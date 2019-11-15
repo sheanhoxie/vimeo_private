@@ -1,0 +1,12 @@
+vimeo_thumbnail_rebuilder.vimeo_credentials_form:
+  title: 'Vimeo Credentials'
+  route_name: vimeo_thumbnail_rebulder.vimeo_credentials_form
+  description: 'Vimeo credentials'
+  parent: system.admin_config_system
+  weight: 99
+
+vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form:
+  title: 'Rebuild Vimeo thumbnails'
+  route_name: vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form
+  description: 'Rebuild Vimeo thumbnails'
+  parent: vimeo_thumbnail_rebuilder.vimeo_credentials_form

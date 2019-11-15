@@ -1,0 +1,7 @@
+services:
+  logger.channel.vimeo_thumbnail_rebuilder:
+    parent: logger.channel_base
+    arguments: ['vimeo_thumbnail_rebuilder']
+  vimeo_thumbnail_rebuilder.missing_thumbnail_rebuilder:
+    class: Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder
+    arguments: ['@config.factory', '@logger.channel.vimeo_thumbnail_rebuilder', '@current_user', '@entity_type.manager', '@messenger']

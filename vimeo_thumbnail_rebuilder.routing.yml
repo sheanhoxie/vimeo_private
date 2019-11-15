@@ -1,0 +1,21 @@
+vimeo_thumbnail_rebuilder.vimeo_credentials_form:
+  path: '/admin/config/vimeo_thumbnail_rebuilder/vimeo_credentials'
+  defaults:
+    _form: '\Drupal\vimeo_thumbnail_rebuilder\Form\VimeoCredentialsForm'
+    _title: 'Rebuild Vimeo thumbnails'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
+
+vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form:
+  path: '/admin/vimeo-thumbnail-rebuilder/rebuild'
+  defaults:
+    _form: '\Drupal\vimeo_thumbnail_rebuilder\Form\RebuildVimeoThumbnailsForm'
+    _title: 'Rebuild Vimeo Thumbnails'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
