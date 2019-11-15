@@ -1,5 +1,5 @@
 name: Vimeo Thumbnail Rebuilder
-description: Rebuilds Vimeo thumbnails using the Vime API
+description: Rebuilds Vimeo thumbnails
 
 type: module
 core: 8.x

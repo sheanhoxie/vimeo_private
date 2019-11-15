@@ -1,13 +1,12 @@
 <?php
 
-namespace Drupal\vimeo_thumbnails_rebuilder\Form;
+namespace Drupal\vimeo_thumbnail_rebuilder\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\RfcLogLevel;
 
 /**
- * Class UpdateVimeoThumbnailsForm.
+ * Class RebuildVimeoThumbnailsForm.
  */
 class RebuildVimeoThumbnailsForm extends FormBase {
 
@@ -43,7 +42,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     /** @var \Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder $vimeo */
-    $vimeo = \Drupal::service('vimeo_thumbnail_rebuilder.missing_thumbnail_rebuilder');
+    $vimeo = \Drupal::service('vimeo_thumbnail_rebuilder.thumbnail_rebuilder');
     $vimeo->rebuildMissingVimeoThumbnails();
   }
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Class Vimeo Thumbnail Rebuilder
+ * Class VimeoThumbnailRebuilder
  */
 
 namespace Drupal\vimeo_thumbnail_rebuilder;
