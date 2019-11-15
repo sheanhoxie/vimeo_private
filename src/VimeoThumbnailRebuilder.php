@@ -7,12 +7,12 @@
 namespace Drupal\vimeo_thumbnail_rebuilder;
 
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
@@ -20,11 +20,6 @@ use Drupal\user\Entity\User;
 use Vimeo\Vimeo;
 
 class VimeoThumbnailRebuilder {
-
-  /**
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  private $configFactory;
 
   /**
    * @var \Drupal\Core\Logger\LoggerChannelInterface
@@ -47,20 +42,25 @@ class VimeoThumbnailRebuilder {
   private $messenger;
 
   /**
+   * @var \Drupal\Core\State\StateInterface
+   */
+  private $state;
+
+  /**
    * VimeoThumbnailRebuilder constructor.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   * @param \Drupal\Core\State\StateInterface $state
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
    * @param \Drupal\Core\Session\AccountInterface $current_user
    * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    */
-  public function __construct(ConfigFactoryInterface $configFactory, LoggerChannelInterface $logger, AccountInterface $current_user, EntityTypeManager $entityTypeManager, MessengerInterface $messenger) {
-    $this->configFactory = $configFactory;
+  public function __construct(StateInterface $state, LoggerChannelInterface $logger, AccountInterface $current_user, EntityTypeManager $entityTypeManager, MessengerInterface $messenger) {
     $this->logger = $logger;
     $this->current_user = $current_user;
     $this->entityTypeManager = $entityTypeManager;
     $this->messenger = $messenger;
+    $this->state = $state;
   }
 
   /**
@@ -73,9 +73,12 @@ class VimeoThumbnailRebuilder {
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
   public function rebuildMissingVimeoThumbnails() {
-    $vimeo_config = $this->configFactory->get('vimeo_thumbnail_rebuilder.vimeo_credentials');
+    $client_id = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id');
+    $client_secret = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret');
+    $api_token = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token');
+
     /** @var Vimeo $vimeo_client */
-    $vimeo_client = new Vimeo($vimeo_config->get('client_id'), $vimeo_config->get('client_secret'), $vimeo_config->get('api_token'));
+    $vimeo_client = new Vimeo($client_id, $client_secret, $api_token);
 
     $videos = $this->loadAllVimeoMedia();
 

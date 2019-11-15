@@ -2,21 +2,39 @@
 
 namespace Drupal\vimeo_thumbnail_rebuilder\Form;
 
-use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\State\StateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class VimeoCredentialsForm.
  */
-class VimeoCredentialsForm extends ConfigFormBase {
+class VimeoCredentialsForm extends FormBase {
 
   /**
-   * {@inheritdoc}
+   * @var \Drupal\Core\State\StateInterface
    */
-  protected function getEditableConfigNames() {
-    return [
-      'vimeo_thumbnail_rebuilder.vimeo_credentials',
-    ];
+  private $state;
+
+  /**
+   * VimeoCredentialsForm constructor.
+   *
+   * @param \Drupal\Core\State\StateInterface $state
+   */
+  public function __construct(StateInterface $state) {
+    $this->state = $state;
+  }
+
+  /**
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *
+   * @return \Drupal\Core\Form\FormBase|\Drupal\vimeo_thumbnail_rebuilder\Form\VimeoCredentialsForm
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('state')
+    );
   }
 
   /**
@@ -30,27 +48,27 @@ class VimeoCredentialsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('vimeo_thumbnail_rebuilder.vimeo_credentials');
     $form['client_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Client ID'),
       '#maxlength' => 64,
       '#size' => 64,
-      '#default_value' => $config->get('client_id'),
+      '#default_value' => $this->state->get('vimeo.thumbnail_rebuilder.vimeo_credentials.client_id'),
     ];
     $form['client_secret'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Client Secret'),
       '#maxlength' => 128,
       '#size' => 64,
-      '#default_value' => $config->get('client_secret'),
+      '#default_value' => $this->state->get('vimeo.thumbnail_rebuilder.vimeo_credentials.client_secret'),
     ];
     $form['api_token'] = [
       '#type' => 'password',
       '#title' => $this->t('API token'),
       '#maxlength' => 64,
       '#size' => 64,
-      '#default_value' => $config->get('api_token'),
+      '#default_value' => '',
+      '#description' => $this->state->get('vimeo.thumbnail_rebuilder.vimeo_credentials.api_token') ? t("API Token Set") : t("API Token Not Set"),
     ];
     return parent::buildForm($form, $form_state);
   }
@@ -67,12 +85,9 @@ class VimeoCredentialsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-
-    $this->config('vimeo_thumbnail_rebuilder.vimeo_credentials')
-      ->set('client_id', $form_state->getValue('client_id'))
-      ->set('client_secret', $form_state->getValue('client_secret'))
-      ->set('api_token', $form_state->getValue('api_token'))
-      ->save();
+    $this->state->set('vimeo.thumbnail_rebuilder.vimeo_credentials.client_id', $form_state->getValue('client_id'));
+    $this->state->set('vimeo.thumbnail_rebuilder.vimeo_credentials.client_secret', $form_state->getValue('client_secret'));
+    $this->state->set('vimeo.thumbnail_rebuilder.vimeo_credentials.api_token', $form_state->getValue('api_token'));
   }
 
 }
