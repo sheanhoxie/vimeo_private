@@ -87,29 +87,26 @@ class VimeoCredentialsForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    if (!$form_state->getValue('client_id')) {
+      return $form_state->setErrorByName('client_id', $this->t("Client ID required"));
+    }
+    if (!$client_secret = $form_state->getValue('client_secret')) {
+      return $form_state->setErrorByName('client_secret', $this->t("Client Secret required"));
+    }
+    if (!$api_token = $form_state->getValue('api_token')) {
+      return $form_state->setErrorByName('api_token', $this->t("API Token required"));
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if (!$client_id = $form_state->getValue('client_id')) {
-      $this->messenger->addMessage($this->t('Client ID not set'), 'warning');
-    }
-    if (!$client_secret = $form_state->getValue('client_secret')) {
-      $this->messenger->addMessage($this->t('Client Secret not set'), 'warning');
-    }
-    if (!$api_token = $form_state->getValue('api_token')) {
-      $this->messenger->addMessage($this->t('API Token not set'), 'warning');
-    }
+    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id', $form_state->getValue('client_id'));
+    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret', $form_state->getValue('client_secret'));
+    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token', $form_state->getValue('api_token'));
 
-    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id', $client_id);
-    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret', $client_secret);
-    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token', $api_token);
-
-    if ($client_id && $client_secret && $api_token) {
-      $this->messenger->addMessage($this->t('Vimeo credentials set.'));
-    }
+    $this->messenger->addMessage($this->t('Vimeo credentials set.'));
   }
 
 }
