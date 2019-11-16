@@ -77,6 +77,11 @@ class VimeoThumbnailRebuilder {
     $client_secret = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret');
     $api_token = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token');
 
+    if (!isset($client_id) || !isset($client_secret) || !isset($api_token)) {
+      $this->messenger->addMessage(t('Vimeo credentials missing.'), 'error');
+      return;
+    }
+
     /** @var Vimeo $vimeo_client */
     $vimeo_client = new Vimeo($client_id, $client_secret, $api_token);
 
