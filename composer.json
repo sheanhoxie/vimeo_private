@@ -9,5 +9,8 @@
       "name": "Shean Hoxie (sheanhoxie)",
       "role": "Maintainer"
     }
-  ]
+  ],
+  "require": {
+    "vimeo/vimeo-api": "^3.0"
+  }
 }
