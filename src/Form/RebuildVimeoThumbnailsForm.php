@@ -176,7 +176,14 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     }
 
     $scope = $form_state->getValue('scope');
+
     $image_style = ImageStyle::load($form_state->getValue('image_style'));
+    // make sure the image style directory exists and is writeable
+    $directory = file_default_scheme() . '://styles/' . $image_style->getName();
+    if (!$prepare_destination = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      return $form_state->setErrorByName('Unable to write to image style directory');
+    }
+
 
     $batch = [
       'title' => t('Vimeo Thumbnail Rebuilder'),
