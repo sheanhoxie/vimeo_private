@@ -121,6 +121,18 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // Get the image styles
+    $image_styles = $this->entityTypeManager->getStorage('image_style')
+      ->getQuery()
+      ->execute();
+
+    $form['image_style'] = [
+      '#type' => 'select',
+      '#title' => 'Choose image style to generate',
+      '#options' => $image_styles,
+      '#required' => TRUE,
+    ];
+
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Update all Vimeo thumbnails'),
@@ -153,11 +165,15 @@ class RebuildVimeoThumbnailsForm extends FormBase {
       ];
     }
 
+    $image_style = ImageStyle::load($form_state->getValue('image_style'));
+
+    $hean = 21;
+
     $batch = [
       'title' => t('Vimeo Thumbnail Rebuilder'),
       'init_message' => t('<h2>Preparing to batch process Vimeo thumbnails...</h2>'),
       'operations' => [
-        [[$this, 'batchThumbnailRebuild'], [$batch_videos]],
+        [[$this, 'batchThumbnailRebuild'], [$batch_videos, $image_style]],
       ],
       'finished' => [$this, 'batchFinished'],
     ];
@@ -169,14 +185,13 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * Batch process the video thumbnails rebuild
    *
    * @param $videos
+   * @param $image_style
    * @param $context
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  public function batchThumbnailRebuild($videos, &$context) {
+  public function batchThumbnailRebuild($videos, $image_style, &$context) {
 
     // Setup the sandbox
     if (empty($context['sandbox'])) {
@@ -203,8 +218,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     $thumbnail = File::load($thumbnail_tid);
     // Only build the thumbnail if it's missing or using the default thumbnail
     if (!$thumbnail->getFilename() || $thumbnail->getFilename() == 'video.png') {
-      if ($thumbnail_url = self::getThumbnailUrl($video)) {
-        $thumbnail_file = self::createThumbnailFromUrl($thumbnail_url, $thumbnail_tid);
+      if ($thumbnail_file = self::createThumbnailFromVideo($video, $image_style)) {
         $video->thumbnail->target_id = $thumbnail_file->id();
         $video->save();
         $context['results']['processed']++;
@@ -288,7 +302,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
       return FALSE;
     }
 
-    $video_id = $this->getVimeoIDFromUri($video->get('field_media_oembed_video')->value);
+    $video_id = $this->getVimeoIDFromUrl($video->get('field_media_oembed_video')->value);
     $vimeo_response = $this->vimeo->request('/videos/' . $video_id, [], 'GET');
 
     if ($thumbnail_url = isset($vimeo_response['body']['pictures'])) {
@@ -302,45 +316,58 @@ class RebuildVimeoThumbnailsForm extends FormBase {
   /**
    * Get the Vimeo video ID
    *
-   * @param string $uri
-   *  Video, or thumbnail uri
+   * @param string $url
+   *  Video, or thumbnail url
    *
    * @return string
    *  The vimeo video id. Can return with file extension
    */
-  private function getVimeoIDFromUri($uri) {
-    $url = explode('/', $uri);
-    $video_id = array_pop($url);
+  private function getVimeoIDFromUrl($url) {
+    $url_array = explode('/', $url);
+    $video_id = array_pop($url_array);
 
     return $video_id;
+  }
+
+  private function getThumbnailInfo($url) {
+    $vimeo_id['filename'] = $this->getVimeoIDFromUrl($url);
+    // strip the appended dimensions tag and extension from the filename
+    if ($dimensions = explode('_', $vimeo_id['filename'])) {
+      $vimeo_id['video_id'] = $dimensions[0];
+      // break the dimensions and extension apart and save
+      if ($extension = explode('.', $dimensions[1])) {
+        $vimeo_id['dimensions'] = $extension[0];
+        $vimeo_id['extension'] = $extension[1];
+      }
+    }
+
+    return $vimeo_id;
   }
 
   /**
    * Save the image and create the thumbnail
    *
-   * @param string $thumbnail_uri
-   *  The vimeo video uri
-   *
-   * @param $thumbnail_tid
+   * @param $video
+   * @param $image_style
    *
    * @return \Drupal\file\FileInterface
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  private function createThumbnailFromUrl($thumbnail_uri, $thumbnail_tid) {
-    $image_style = ImageStyle::load('vimeo_thumbnail');
-    $image_name = $this->getVimeoIDFromUri($thumbnail_uri);
-
+  private function createThumbnailFromVideo($video, ImageStyle $image_style) {
+    $thumbnail_url = self::getThumbnailUrl($video);
+    $thumbnail_info = $this->getThumbnailInfo($thumbnail_url);
     // Get the name of the file, and set it's full size destination
-    $image_dest = 'public://vimeo_pictures/' . $image_name;
+    $image_dest = $image_style->buildUri($thumbnail_info['filename']);
 
     // Get the image from vimeo, and save it locally
-    $image_data = file_get_contents($thumbnail_uri);
+    $image_data = file_get_contents($thumbnail_url);
     /** @var \Drupal\file\FileInterface $image */
     $image = file_save_data($image_data, $image_dest, FileSystemInterface::EXISTS_REPLACE);
 
     // Create the thumbnail
     $image_uri = $image->getFileUri();
-    $thumb_dest = $image_style->buildUri('public://thumbnails/' . $thumbnail_tid . '_' . $image_style->getName() . '.jpg');
+    $thumb_dest = $image_style->buildUri($thumbnail_info['video_id'] . '_' . $image_style->getName() . '.' . $thumbnail_info['extension']);
     $image_style->createDerivative($image_uri, $thumb_dest);
 
     $image->setFileUri($thumb_dest);
