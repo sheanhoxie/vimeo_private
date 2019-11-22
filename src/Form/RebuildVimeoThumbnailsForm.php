@@ -64,15 +64,28 @@ class RebuildVimeoThumbnailsForm extends FormBase {
   private $credentials_set = FALSE;
 
   /**
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  private $image_styles;
+
+  /**
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  private $media_entity;
+
+  /**
    * Constructs a new \Drupal\vimeo_thumbnail_rebuilder\Form\RebuildVimeoThumbnailsForm
    *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
-   * @param \Drupal\Core\State\StateInterface $state
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    * @param \Drupal\Core\Session\AccountInterface $current_user
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   * @param \Drupal\Core\State\StateInterface $state
    * @param \Vimeo\Vimeo $vimeo
    *  The vimeo client
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function __construct(AccountInterface $current_user, EntityTypeManagerInterface $entityTypeManager, LoggerChannelInterface $logger, MessengerInterface $messenger, StateInterface $state, Vimeo $vimeo) {
     $this->logger = $logger;
@@ -80,6 +93,8 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     $this->messenger = $messenger;
     $this->current_user = $current_user;
     $this->entityTypeManager = $entityTypeManager;
+    $this->image_styles = $entityTypeManager->getStorage('image_style')->getQuery()->execute();
+    $this->media_entity = $entityTypeManager->getStorage('media');
 
     // Build the Vimeo client
     $client_id = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id');
@@ -121,10 +136,6 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // Get the image styles
-    $image_styles = $this->entityTypeManager->getStorage('image_style')
-      ->getQuery()
-      ->execute();
 
     $form['scope'] = [
       '#type' => 'select',
@@ -139,7 +150,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     $form['image_style'] = [
       '#type' => 'select',
       '#title' => t('Choose image style:'),
-      '#options' => $image_styles,
+      '#options' => $this->image_styles,
       '#required' => TRUE,
     ];
 
@@ -290,11 +301,9 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * Returns all existing Media of type 'vimeo'
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function loadAllVimeoMedia() {
-    $media_storage = $this->entityTypeManager->getStorage('media');
+    $media_storage = $this->media_entity;
     $media_id = $media_storage->getQuery()
       ->condition('bundle', 'vimeo')
       ->exists('field_media_oembed_video')
