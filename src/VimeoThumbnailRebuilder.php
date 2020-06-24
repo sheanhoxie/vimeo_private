@@ -99,7 +99,8 @@ class VimeoThumbnailRebuilder {
       /** @var File $file */
       $file = File::load($thumbnail);
       if (!$file->getFilename() || $file->getFilename() == 'video.png') {
-        if ($thumbnail_url = $this->getThumbnailUrl($video)) {
+        $vimeo_id = $this->getVimeoVideoID($video->get('field_media_oembed_video')->value);
+        if ($thumbnail_url = $this->getThumbnailUrl($vimeo_id)) {
           $thumbnail_file = $this->createThumbnailFromUrl($thumbnail_url);
           $video->thumbnail->target_id = $thumbnail_file->id();
           $video->save();
@@ -135,15 +136,13 @@ class VimeoThumbnailRebuilder {
   /**
    * Get the thumbnail from Vimeo.com
    *
-   * @param \Vimeo\Vimeo $client
-   * @param \Drupal\media\Entity\Media $video
+   * @param string $vimeo_id
    *
    * @return string
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  private function getThumbnailUrl(Media $video) {
-    $video_id = $this->getVimeoVideoID($video->get('field_media_oembed_video')->value);
-    $vimeo_response = $this->vimeo->request('/videos/' . $video_id, [], 'GET');
+  public function getThumbnailUrl($vimeo_id) {
+    $vimeo_response = $this->vimeo->request('/videos/' . $vimeo_id, [], 'GET');
 
     if ($thumbnail_url = isset($vimeo_response['body']['pictures'])) {
       $parsed_thumb = UrlHelper::parse($vimeo_response["body"]["pictures"]["sizes"][1]["link"]);
