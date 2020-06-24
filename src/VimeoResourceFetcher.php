@@ -40,13 +40,7 @@ class VimeoResourceFetcher extends ResourceFetcher {
     }
 
     try {
-      $headers = $this->httpClient->getConfig('headers');
-      if (strpos($url, 'vimeo.com')) {
-        $host = \Drupal::request()->getHost();
-        $new_header = ['Referer' => 'members.cardioyoga.com'];
-        $headers = array_merge($headers, $new_header);
-      }
-      $response = $this->httpClient->get($url, ['headers' => $headers]);
+      $response = $this->httpClient->get($url);
     }
     catch (RequestException $e) {
       throw new ResourceException('Could not retrieve the oEmbed resource.', $url, [], $e);
