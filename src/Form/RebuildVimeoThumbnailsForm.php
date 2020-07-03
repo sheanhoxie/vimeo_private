@@ -144,13 +144,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
         'missing' => t('Rebuild MISSING Vimeo thumbnails'),
         'all' => t('Rebuild ALL Vimeo thumbnails'),
       ],
-      '#required' => FALSE,
-    ];
-
-    // Add the ability to select one or more media:vimeo entities
-    $form['select'] = [
-      '#type' => 'select',
-      '#options' =>
+      '#required' => TRUE,
     ];
 
     $form['image_style'] = [
