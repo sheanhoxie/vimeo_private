@@ -53,7 +53,7 @@ class VimeoThumbnailsConfigForm extends ConfigFormBase {
       '#type' => 'select',
       '#title' => t('Choose image style:'),
       '#options' => $image_styles,
-      '#default_value' => '',
+      '#default_value' => $default_style,
       '#required' => TRUE,
     ];
 
@@ -77,9 +77,9 @@ class VimeoThumbnailsConfigForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-
+$hean = 21;
     $this->config('vimeo_thumbnail_rebuilder.settings')
-      ->set('default_style', $form_state->getValue(['vimeo_thumbnail_rebuilder_settings', 'default_style']))
+      ->set('default_style', $form_state->getValue('default_style'))
       ->save();
   }
 
