@@ -1,0 +1,14 @@
+vimeo_thumbnail_rebuilder.settings_tab:
+  route_name: vimeo_thumbnail_rebuilder.settings
+  title: 'Settings'
+  base_route: vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form
+
+vimeo_thumbnail_rebuilder.credentials_tab:
+  route_name: vimeo_thumbnail_rebuilder.vimeo_credentials_form
+  title: 'Credentials'
+  base_route: vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form
+
+vimeo_thumbnail_rebuilder.rebuild_form:
+  route_name: vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form
+  title: 'Rebuild Thumbnails'
+  base_route: vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form

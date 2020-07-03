@@ -1,12 +1,27 @@
-vimeo_thumbnail_rebuilder.vimeo_credentials_form:
-  title: 'Vimeo Credentials'
-  route_name: vimeo_thumbnail_rebuilder.vimeo_credentials_form
-  description: 'Vimeo credentials'
+vimeo_thumbnail_rebuilder.main_menu:
+  title: 'Vimeo Thumbnail Rebuilder'
+  route_name: vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form
+  description: 'Rebuild Vimeo thumbnails'
   parent: system.admin_config_system
   weight: 99
 
 vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form:
-  title: 'Rebuild Vimeo thumbnails'
+  title: 'Vimeo Thumbnail Rebuilder'
   route_name: vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form
   description: 'Rebuild Vimeo thumbnails'
-  parent: vimeo_thumbnail_rebuilder.vimeo_credentials_form
+  parent: vimeo_thumbnail_rebuilder.main_menu
+  weight: 10
+
+vimeo_thumbnail_rebuilder.vimeo_credentials_form:
+  title: 'Vimeo Credentials'
+  route_name: vimeo_thumbnail_rebuilder.vimeo_credentials_form
+  description: 'Vimeo credentials'
+  parent: vimeo_thumbnail_rebuilder.main_menu
+  weight: 20
+
+vimeo_thumbnail_rebuilder.settings:
+  title: 'Settings'
+  route_name: vimeo_thumbnail_rebuilder.settings
+  description: 'Vimeo Thumbnail Rebuilder Settings'
+  parent: vimeo_thumbnail_rebuilder.main_menu
+  weight: 30

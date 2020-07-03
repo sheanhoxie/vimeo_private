@@ -72,7 +72,7 @@ class VimeoCredentialsForm extends FormBase {
       '#maxlength' => 64,
       '#size' => 64,
       '#default_value' => '',
-      '#description' => $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token') ? t("API Token Set") : t("API Token Not Set"),
+      '#description' => $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token') ? t("API Token Set &#x2705;") : t("API Token Not Set &#x2757;"),
     ];
     $form['submit'] = [
       '#type' => 'submit',
