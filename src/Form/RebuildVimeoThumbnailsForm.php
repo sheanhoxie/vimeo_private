@@ -137,6 +137,9 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
+    $config = $this->config('vimeo_thumbnail_rebuilder.settings');
+    $default_style = $config->get('default_style');
+
     $form['scope'] = [
       '#type' => 'select',
       '#title' => t('Choose which thumbnails to rebuild:'),
@@ -144,6 +147,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
         'missing' => t('Rebuild MISSING Vimeo thumbnails'),
         'all' => t('Rebuild ALL Vimeo thumbnails'),
       ],
+      '#default_value' => 'missing',
       '#required' => TRUE,
     ];
 
@@ -151,6 +155,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
       '#type' => 'select',
       '#title' => t('Choose image style:'),
       '#options' => $this->image_styles,
+      '#default_value' => isset($default_style) ? $default_style : '',
       '#required' => TRUE,
     ];
 
