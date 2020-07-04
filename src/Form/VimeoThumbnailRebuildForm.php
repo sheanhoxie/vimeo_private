@@ -26,7 +26,7 @@ use Vimeo\Vimeo;
 /**
  * Provides a form to rebuild vimeo thumbnails
  */
-class RebuildVimeoThumbnailsForm extends FormBase {
+class VimeoThumbnailsRebuildForm extends FormBase {
 
   /**
    * @var \Drupal\Core\Session\AccountInterface
