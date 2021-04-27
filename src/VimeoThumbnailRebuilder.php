@@ -18,8 +18,6 @@ class VimeoThumbnailRebuilder {
   private static $clientSecret;
   private static $apiToken;
 
-  private static $vimeo;
-
   public static function vimeoCredentials() {
     $state = \Drupal::state();
     self::$clientId = $state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id');
@@ -132,7 +130,7 @@ class VimeoThumbnailRebuilder {
    * @param $video
    * @param $image_style
    *
-   * @return \Drupal\file\FileInterface
+   * @return bool
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
@@ -156,7 +154,10 @@ class VimeoThumbnailRebuilder {
     $image->setFileUri($thumb_dest);
     $image->save();
 
-    return $image;
+    $video->thumbnail->target_id = $image->id();
+    $video->save();
+
+    return TRUE;
   }
 
 }
