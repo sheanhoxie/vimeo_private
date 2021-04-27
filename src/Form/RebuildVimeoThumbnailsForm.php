@@ -56,24 +56,22 @@ class RebuildVimeoThumbnailsForm extends FormBase {
   private $vimeoThumbnailRebuilder;
 
   /**
-   * Constructs a new \Drupal\vimeo_thumbnail_rebuilder\Form\RebuildVimeoThumbnailsForm
+   * Constructs a new RebuildVimeoThumbnailsForm
    *
    * @param  \Drupal\Core\Session\AccountInterface                      $currentUser
    * @param  \Drupal\Core\Entity\EntityTypeManagerInterface             $entityTypeManager
    * @param  \Drupal\Core\Logger\LoggerChannelInterface                 $logger
    * @param  \Drupal\Core\Messenger\MessengerInterface                  $messenger
-   * @param  \Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder  $vimeoThumbnailRebuilder
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct(AccountInterface $currentUser, EntityTypeManagerInterface $entityTypeManager, LoggerChannelInterface $logger, MessengerInterface $messenger, VimeoThumbnailRebuilder $vimeoThumbnailRebuilder) {
+  public function __construct(AccountInterface $currentUser, EntityTypeManagerInterface $entityTypeManager, LoggerChannelInterface $logger, MessengerInterface $messenger) {
     $this->logger = $logger;
     $this->messenger = $messenger;
     $this->currentUser = $currentUser;
     $this->entityTypeManager = $entityTypeManager;
     $this->imageStyles = $entityTypeManager->getStorage('image_style')->getQuery()->execute();
-    $this->vimeoThumbnailRebuilder = $vimeoThumbnailRebuilder;
   }
 
   /**
@@ -84,8 +82,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
       $container->get('current_user'),
       $container->get('entity_type.manager'),
       $container->get('logger.factory')->get('vimeo_thumbnail_rebuilder'),
-      $container->get('messenger'),
-      $container->get('vimeo_thumbnail_rebuilder.thumbnail_rebuilder')
+      $container->get('messenger')
     );
   }
 
@@ -100,7 +97,6 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-
     $config = $this->config('vimeo_thumbnail_rebuilder.settings');
     $default_style = $config->get('default_style');
 
@@ -126,7 +122,6 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Update all Vimeo thumbnails'),
-      '#disabled' => !$this->vimeoThumbnailRebuilder->vimeoCredentialsSet(),
     ];
 
     return $form;
@@ -144,7 +139,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Get all Vimeo videos
-    $videos = $this->vimeoThumbnailRebuilder->loadAllVimeoMedia();
+    $videos = VimeoThumbnailRebuilder::loadAllVimeoMedia();
 
     $batch_videos = [];
     /** @var \Drupal\media\Entity\Media $video */
@@ -188,7 +183,6 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
   public function batchThumbnailRebuild($videos, $image_style, $scope, &$context) {
-
     // Setup the sandbox
     if (empty($context['sandbox'])) {
       $context['sandbox']['progress'] = 0;
@@ -214,7 +208,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     $thumbnail = File::load($thumbnail_tid);
     // Only build the thumbnail if it's missing or using the default thumbnail
     if ($scope === 'all' || !$thumbnail->getFilename() || $thumbnail->getFilename() == 'video.png') {
-      if ($thumbnail_file = $this->vimeoThumbnailRebuilder->createThumbnailFromVideo($video, $image_style)) {
+      if ($thumbnail_file = VimeoThumbnailRebuilder::createThumbnailFromVideo($video, $image_style)) {
         $video->thumbnail->target_id = $thumbnail_file->id();
         $video->save();
         $context['results']['processed']++;

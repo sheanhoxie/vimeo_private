@@ -1,78 +1,59 @@
 <?php
 
-/**
- * @file
- * Class VimeoThumbnailRebuilder
+/** @file
+ *  Provides the functionality for updating vimeo thumbnails
  */
 
 namespace Drupal\vimeo_thumbnail_rebuilder;
 
-
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\State\StateInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
 use Vimeo\Vimeo;
 
 class VimeoThumbnailRebuilder {
 
-  /**
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  private $entityTypeManager;
+  private static $clientId;
+  private static $clientSecret;
+  private static $apiToken;
 
-  /**
-   * @var \Drupal\Core\State\StateInterface
-   */
-  private $state;
+  private static $vimeo;
 
-  /**
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  private $messenger;
+  public static function vimeoCredentials() {
+    $state = \Drupal::state();
+    self::$clientId = $state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id');
+    self::$clientSecret = $state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret');
+    self::$apiToken = $state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token');
 
-  /**
-   * VimeoThumbnailRebuilder constructor.
-   *
-   * @param  \Drupal\Core\Entity\EntityTypeManagerInterface  $entityTypeManager
-   * @param  \Drupal\Core\State\StateInterface               $state
-   * @param  \Drupal\Core\Messenger\MessengerInterface       $messenger
-   * @param  \Vimeo\Vimeo                                    $vimeo
-   */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, StateInterface $state, MessengerInterface $messenger, Vimeo $vimeo) {
-    $this->entityTypeManager = $entityTypeManager;
-    $this->state = $state;
-    $this->messenger = $messenger;
-
-    // Build the Vimeo client
-    $client_id = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id');
-    $client_secret = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret');
-    $api_token = $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token');
-
-    if (isset($client_id) && isset($client_secret) && isset($api_token)) {
-      $this->credentials_set = TRUE;
+    switch (FALSE) {
+      case isset(self::$clientId):
+      case isset(self::$clientSecret):
+      case isset(self::$apiToken):
+        $messenger = \Drupal::messenger();
+        $messenger->addWarning(t('You need to set your Vimeo credentials.'));
+        return FALSE;
     }
-    else {
-      $message = t('You need to set your Vimeo credentials');
-      $this->messenger->addWarning($message);
-    }
-    $this->vimeo = new Vimeo($client_id, $client_secret, $api_token);
+
+    return TRUE;
   }
 
-  public function vimeoCredentialsSet() {
-    return FALSE;
+  private static function vimeo() {
+    if (self::vimeoCredentials()) {
+      return new Vimeo(self::$clientId, self::$clientSecret, self::$apiToken);
+    }
   }
 
   /**
    * Returns all existing Media of type 'vimeo'
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function loadAllVimeoMedia() {
-    $media_storage = $this->entityTypeManager->getStorage('media');
+  public static function loadAllVimeoMedia() {
+    $entityTypeManager = \Drupal::entityTypeManager();
+    $media_storage = $entityTypeManager->getStorage('media');
     $media_id = $media_storage->getQuery()
       ->condition('bundle', 'vimeo')
       ->exists('field_media_oembed_video')
@@ -89,14 +70,15 @@ class VimeoThumbnailRebuilder {
    * @return string
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  public function getThumbnailUrl(Media $video) {
+  public static function getThumbnailUrl(Media $video) {
     // @todo refactor this
     if (!$video->get('field_media_oembed_video')->value) {
       return FALSE;
     }
 
-    $video_id = $this->getVimeoIDFromUrl($video->get('field_media_oembed_video')->value);
-    $vimeo_response = $this->vimeo->request('/videos/' . $video_id, [], 'GET');
+    $vimeo = self::vimeo();
+    $video_id = self::getVimeoIDFromUrl($video->get('field_media_oembed_video')->value);
+    $vimeo_response = $vimeo->request('/videos/' . $video_id, [], 'GET');
 
     if ($thumbnail_url = isset($vimeo_response['body']['pictures'])) {
       $parsed_thumb = UrlHelper::parse($vimeo_response["body"]["pictures"]["sizes"][3]["link"]);
@@ -115,7 +97,7 @@ class VimeoThumbnailRebuilder {
    * @return string
    *  The vimeo video id. Can return with file extension
    */
-  public function getVimeoIDFromUrl($url) {
+  public static function getVimeoIDFromUrl($url) {
     $url_array = explode('/', $url);
     $video_id = array_pop($url_array);
 
@@ -129,8 +111,8 @@ class VimeoThumbnailRebuilder {
    *
    * @return array
    */
-  public function getThumbnailInfo($url) {
-    $vimeo_id['filename'] = $this->getVimeoIDFromUrl($url);
+  public static function getThumbnailInfo($url) {
+    $vimeo_id['filename'] = self::getVimeoIDFromUrl($url);
     // strip the appended dimensions tag and extension from the filename
     if ($dimensions = explode('_', $vimeo_id['filename'])) {
       $vimeo_id['video_id'] = $dimensions[0];
@@ -154,9 +136,9 @@ class VimeoThumbnailRebuilder {
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  public function createThumbnailFromVideo($video, ImageStyle $image_style) {
+  public static function createThumbnailFromVideo($video, ImageStyle $image_style) {
     $thumbnail_url = self::getThumbnailUrl($video);
-    $thumbnail_info = $this->getThumbnailInfo($thumbnail_url);
+    $thumbnail_info = self::getThumbnailInfo($thumbnail_url);
 
     // Set the full size image destination
     $image_dest = $image_style->buildUri($thumbnail_info['filename']);
