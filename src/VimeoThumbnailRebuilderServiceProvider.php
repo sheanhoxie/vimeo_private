@@ -11,8 +11,10 @@ class VimeoThumbnailRebuilderServiceProvider extends ServiceProviderBase {
    * Override the resource_fetcher service
    */
   public function alter(ContainerBuilder $container) {
-    $definition = $container->getDefinition('media.oembed.resource_fetcher');
-    $definition->setClass('Drupal\vimeo_thumbnail_rebuilder\VimeoResourceFetcher');
+    if ($container->hasDefinition('media.oembed.resource_fetcher')) {
+      $definition = $container->getDefinition('media.oembed.resource_fetcher');
+      $definition->setClass('Drupal\vimeo_thumbnail_rebuilder\VimeoResourceFetcher');
+    }
   }
 
 }
