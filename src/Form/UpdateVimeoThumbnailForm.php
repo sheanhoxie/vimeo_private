@@ -2,11 +2,8 @@
 
 namespace Drupal\vimeo_thumbnail_rebuilder\Form;
 
-use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\image\Entity\ImageStyle;
-use Drupal\media_entity_embeddable_video\VideoProviderInterface;
 
 class UpdateVimeoThumbnailForm extends FormBase {
 

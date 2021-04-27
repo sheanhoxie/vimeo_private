@@ -51,11 +51,6 @@ class RebuildVimeoThumbnailsForm extends FormBase {
   private $imageStyles;
 
   /**
-   * @var \Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder
-   */
-  private $vimeoThumbnailRebuilder;
-
-  /**
    * Constructs a new RebuildVimeoThumbnailsForm
    *
    * @param  \Drupal\Core\Session\AccountInterface                      $currentUser
