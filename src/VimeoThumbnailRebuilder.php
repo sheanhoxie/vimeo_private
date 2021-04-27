@@ -62,6 +62,10 @@ class VimeoThumbnailRebuilder {
     $this->vimeo = new Vimeo($client_id, $client_secret, $api_token);
   }
 
+  public function vimeoCredentialsSet() {
+    return FALSE;
+  }
+
   /**
    * Returns all existing Media of type 'vimeo'
    *
