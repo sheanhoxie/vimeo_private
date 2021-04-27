@@ -4,12 +4,15 @@ use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Implements hook_entity_operation_alter().
+ *
+ * @param  array                                $operations
+ * @param  \Drupal\Core\Entity\EntityInterface  $entity
  */
 function vimeo_thumbnail_rebuilder_entity_operation_alter(array &$operations, EntityInterface $entity) {
   if ($entity->getEntityTypeId() === 'media' && $entity->bundle() === 'vimeo') {
     $operations['update_vimeo_thumbnail'] = [
       'title' => t('Update Thumb'),
-      'url' => \Drupal\Core\Url::fromRoute('vimeo_thumbnail_rebuilder.media.update_thumbnail_form', [
+      'url' => \Drupal\Core\Url::fromRoute('vimeo_thumbnail_rebuilder.media.update_vimeo_thumbnail_form', [
         'media' => $entity->id(),
       ]),
       'weight' => 99,

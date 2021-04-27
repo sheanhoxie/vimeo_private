@@ -25,11 +25,11 @@ vimeo_thumbnail_rebuilder.settings:
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE
-vimeo_thumbnail_rebuilder.media.update_thumbnail_form:
+vimeo_thumbnail_rebuilder.media.update_vimeo_thumbnail_form:
   path: '/media/{media}/update_vimeo_thumbnail'
   defaults:
     _title: 'Update Vimeo Thumbnail'
-    _form: 'Drupal\vimeo_thumbnail_rebuilder\Form\VimeoThumbnailRebuilderUpdateVimeoThumbnailForm'
+    _form: 'Drupal\vimeo_thumbnail_rebuilder\Form\UpdateVimeoThumbnailForm'
   options:
     _admin_route: TRUE
     parameters:
