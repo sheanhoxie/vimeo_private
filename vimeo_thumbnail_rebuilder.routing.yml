@@ -7,7 +7,6 @@ vimeo_thumbnail_rebuilder.rebuild_vimeo_thumbnails_form:
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE
-
 vimeo_thumbnail_rebuilder.vimeo_credentials_form:
   path: '/admin/config/vimeo_thumbnail_rebuilder/vimeo_credentials'
   defaults:
@@ -17,7 +16,6 @@ vimeo_thumbnail_rebuilder.vimeo_credentials_form:
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE
-
 vimeo_thumbnail_rebuilder.settings:
   path: '/admin/config/vimeo_thumbnail_rebuilder/settings'
   defaults:
@@ -27,3 +25,15 @@ vimeo_thumbnail_rebuilder.settings:
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE
+vimeo_thumbnail_rebuilder.media.update_thumbnail_form:
+  path: '/media/{media}/update_vimeo_thumbnail'
+  defaults:
+    _title: 'Update Vimeo Thumbnail'
+    _form: 'Drupal\vimeo_thumbnail_rebuilder\Form\VimeoThumbnailRebuilderUpdateVimeoThumbnailForm'
+  options:
+    _admin_route: TRUE
+    parameters:
+      media:
+        type: entity:media
+  requirements:
+    _permission: 'administer users'
