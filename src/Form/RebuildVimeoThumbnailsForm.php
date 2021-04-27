@@ -20,6 +20,7 @@ use Drupal\Core\State\StateInterface;
 use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
+use Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Vimeo\Vimeo;
 
@@ -74,20 +75,26 @@ class RebuildVimeoThumbnailsForm extends FormBase {
   private $media_entity;
 
   /**
+   * @var \Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder
+   */
+  private $vimeoThumbnailRebuilder;
+
+  /**
    * Constructs a new \Drupal\vimeo_thumbnail_rebuilder\Form\RebuildVimeoThumbnailsForm
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   * @param \Drupal\Core\Session\AccountInterface $current_user
-   * @param \Drupal\Core\State\StateInterface $state
-   * @param \Vimeo\Vimeo $vimeo
+   * @param  \Drupal\Core\Session\AccountInterface                      $current_user
+   * @param  \Drupal\Core\Entity\EntityTypeManagerInterface             $entityTypeManager
+   * @param  \Drupal\Core\Logger\LoggerChannelInterface                 $logger
+   * @param  \Drupal\Core\Messenger\MessengerInterface                  $messenger
+   * @param  \Drupal\Core\State\StateInterface                          $state
+   * @param  \Vimeo\Vimeo                                               $vimeo
    *  The vimeo client
+   * @param  \Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder  $vimeoThumbnailRebuilder
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct(AccountInterface $current_user, EntityTypeManagerInterface $entityTypeManager, LoggerChannelInterface $logger, MessengerInterface $messenger, StateInterface $state, Vimeo $vimeo) {
+  public function __construct(AccountInterface $current_user, EntityTypeManagerInterface $entityTypeManager, LoggerChannelInterface $logger, MessengerInterface $messenger, StateInterface $state, Vimeo $vimeo, VimeoThumbnailRebuilder $vimeoThumbnailRebuilder) {
     $this->logger = $logger;
     $this->state = $state;
     $this->messenger = $messenger;
@@ -109,6 +116,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
       $this->messenger->addWarning($message);
     }
     $this->vimeo = new Vimeo($client_id, $client_secret, $api_token);
+    $this->vimeoThumbnailRebuilder = $vimeoThumbnailRebuilder;
   }
 
   /**
@@ -121,7 +129,8 @@ class RebuildVimeoThumbnailsForm extends FormBase {
       $container->get('logger.factory')->get('vimeo_thumbnail_rebuilder'),
       $container->get('messenger'),
       $container->get('state'),
-      $container->get('vimeo_thumbnail_rebuilder.vimeo')
+      $container->get('vimeo_thumbnail_rebuilder.vimeo'),
+      $container->get('vimeo_thumbnail_rebuilder.thumbnail_rebuilder')
     );
   }
 

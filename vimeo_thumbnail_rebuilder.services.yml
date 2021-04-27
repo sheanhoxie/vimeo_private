@@ -4,10 +4,10 @@ services:
     arguments: ['vimeo_thumbnail_rebuilder']
   vimeo_thumbnail_rebuilder.vimeo:
     class: Vimeo\Vimeo
-    arguments: ['', '']
+    arguments: ['', '', '']
   vimeo_thumbnail_rebuilder.thumbnail_rebuilder:
     class: Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder
-    arguments: ['@state', '@logger.channel.vimeo_thumbnail_rebuilder', '@current_user', '@entity_type.manager', '@messenger', '@vimeo_thumbnail_rebuilder.vimeo']
+    arguments: ['@entity_type.manager', '@state', '@messenger', '@vimeo_thumbnail_rebuilder.vimeo']
   vimeo_thumbnail_rebuilder.oembed.vimeo_resource_fetcher:
     class: Drupal\vimeo_thumbnail_rebuilder\VimeoResourceFetcher
     arguments: ['@http_client', '@media.oembed.provider_repository', '@cache.default']
