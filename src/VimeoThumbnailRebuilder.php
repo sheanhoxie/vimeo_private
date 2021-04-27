@@ -136,7 +136,7 @@ class VimeoThumbnailRebuilder {
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  public static function createThumbnailFromVideo($video, ImageStyle $image_style) {
+  public static function rebuildThumbnail($video, ImageStyle $image_style) {
     $thumbnail_url = self::getThumbnailUrl($video);
     $thumbnail_info = self::getThumbnailInfo($thumbnail_url);
 

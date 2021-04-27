@@ -203,7 +203,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     $thumbnail = File::load($thumbnail_tid);
     // Only build the thumbnail if it's missing or using the default thumbnail
     if ($scope === 'all' || !$thumbnail->getFilename() || $thumbnail->getFilename() == 'video.png') {
-      if ($thumbnail_file = VimeoThumbnailRebuilder::createThumbnailFromVideo($video, $image_style)) {
+      if ($thumbnail_file = VimeoThumbnailRebuilder::rebuildThumbnail($video, $image_style)) {
         $video->thumbnail->target_id = $thumbnail_file->id();
         $video->save();
         $context['results']['processed']++;
