@@ -20,9 +20,9 @@ class VimeoResourceFetcher extends ResourceFetcher {
   /**
    * VimeoResourceFetcher constructor.
    *
-   * @param \GuzzleHttp\ClientInterface $http_client
-   * @param \Drupal\media\OEmbed\ProviderRepositoryInterface $providers
-   * @param \Drupal\Core\Cache\CacheBackendInterface|NULL $cache_backend
+   * @param  \GuzzleHttp\ClientInterface                       $http_client
+   * @param  \Drupal\media\OEmbed\ProviderRepositoryInterface  $providers
+   * @param  \Drupal\Core\Cache\CacheBackendInterface|NULL     $cache_backend
    */
   public function __construct(ClientInterface $http_client, ProviderRepositoryInterface $providers, CacheBackendInterface $cache_backend = NULL) {
     parent::__construct($http_client, $providers, $cache_backend);
@@ -41,8 +41,7 @@ class VimeoResourceFetcher extends ResourceFetcher {
 
     try {
       $response = $this->httpClient->get($url);
-    }
-    catch (RequestException $e) {
+    } catch (RequestException $e) {
       throw new ResourceException('Could not retrieve the oEmbed resource.', $url, [], $e);
     }
 
@@ -51,21 +50,21 @@ class VimeoResourceFetcher extends ResourceFetcher {
 
     if (strstr($format, 'text/xml') || strstr($format, 'application/xml')) {
       $data = $this->parseResourceXml($content, $url);
-    }
-    elseif (strstr($format, 'text/javascript') || strstr($format, 'application/json')) {
+    } elseif (strstr($format, 'text/javascript') || strstr($format, 'application/json')) {
       $data = Json::decode($content);
-    }
-    // If the response is neither XML nor JSON, we are in bat country.
+    } // If the response is neither XML nor JSON, we are in bat country.
     else {
       throw new ResourceException('The fetched resource did not have a valid Content-Type header.', $url);
     }
 
     if (strpos($url, 'vimeo.com')) {
-      $thumbnailRebuilder = \Drupal::service('vimeo_thumbnail_rebuilder.thumbnail_rebuilder');
-      $thumbnail_url = $thumbnailRebuilder->getThumbnailUrl($data['video_id']);
+      $vimeoo = VimeoThumbnailRebuilder::requestVimeo($data['video_id']);
+      $hean = 21;
+//      $thumbnailRebuilder = \Drupal::service('vimeo_thumbnail_rebuilder.thumbnail_rebuilder');
+//      $thumbnail_url = $thumbnailRebuilder->getThumbnailUrl($data['video_id']);
       $data += [
-        'thumbnail_url' => $thumbnail_url,
-        'thumbnail_width' => '200',
+        'thumbnail_url'    => 'sup',
+        'thumbnail_width'  => '200',
         'thumbnail_height' => '150',
       ];
     }

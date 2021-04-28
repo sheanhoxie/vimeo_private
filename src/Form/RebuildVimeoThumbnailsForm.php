@@ -126,7 +126,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $batch_videos = [];
     /** @var \Drupal\media\Entity\Media $video */
-    foreach (VimeoThumbnailRebuilder::loadAllVimeoMedia() as $video) {
+    foreach (VimeoThumbnailRebuilder::loadVimeoMedia() as $video) {
       $batch_videos[] = [
         'video'         => $video,
         'thumbnail_tid' => $video->thumbnail->target_id,
