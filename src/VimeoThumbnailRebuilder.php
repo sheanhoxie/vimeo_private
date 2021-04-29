@@ -193,4 +193,45 @@ class VimeoThumbnailRebuilder {
     return $vimeo_id;
   }
 
+  /**
+   * Returns an array of Vimeo video details
+   *
+   * @param  $video
+   *
+   * @return array
+   */
+  public static function parseVimeoVideoRequest($video) {
+    $thumb_size = self::getDefaultImageStyleSize();
+
+    return [
+      'uri' => $video['uri'],
+      'name' => $video['name'],
+      'duration' => $video['duration'],
+      'images' => $video['pictures']['sizes'],
+      'thumbnail_width' =>$thumb_size['width'],
+      'thumbnail_height' => $thumb_size['height'],
+    ];
+  }
+
+  /**
+   * Returns the height and width of the vimeo rebuilder default image style.
+   *
+   * @return array|null
+   */
+  public static function getDefaultImageStyleSize() {
+    $default_style = \Drupal::config('vimeo_thumbnail_rebuilder.settings')->get('default_style');
+    $image_style =  ImageStyle::load($default_style);
+    $effects = $image_style->getEffects()->getConfiguration();
+    foreach ($effects as $uuid => $effect) {
+      if ($effect['id'] === 'image_scale_and_crop') {
+        return $effect['data'];
+      }
+    }
+
+    return [
+      'width' => '150',
+      'height' => '150',
+    ];
+  }
+
 }

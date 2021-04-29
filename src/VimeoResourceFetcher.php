@@ -57,15 +57,15 @@ class VimeoResourceFetcher extends ResourceFetcher {
       throw new ResourceException('The fetched resource did not have a valid Content-Type header.', $url);
     }
 
+    // Set the vimeo thumbnail url + width + height
     if (strpos($url, 'vimeo.com')) {
-      $vimeoo = VimeoThumbnailRebuilder::requestVimeo($data['video_id']);
-      $hean = 21;
-//      $thumbnailRebuilder = \Drupal::service('vimeo_thumbnail_rebuilder.thumbnail_rebuilder');
-//      $thumbnail_url = $thumbnailRebuilder->getThumbnailUrl($data['video_id']);
+      $vimeo = VimeoThumbnailRebuilder::requestVimeo($data['video_id']);
+      $vimeo_data = VimeoThumbnailRebuilder::parseVimeoVideoRequest($vimeo['body']);
+
       $data += [
-        'thumbnail_url'    => 'sup',
-        'thumbnail_width'  => '200',
-        'thumbnail_height' => '150',
+        'thumbnail_url'    => $vimeo_data['images'][3]['link'],
+        'thumbnail_width'  => $vimeo_data['thumbnail_width'],
+        'thumbnail_height' => $vimeo_data['thumbnail_height'],
       ];
     }
 
@@ -73,6 +73,5 @@ class VimeoResourceFetcher extends ResourceFetcher {
 
     return $this->createResource($data, $url);
   }
-
 
 }
