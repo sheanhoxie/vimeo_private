@@ -57,15 +57,17 @@ class VimeoResourceFetcher extends ResourceFetcher {
       throw new ResourceException('The fetched resource did not have a valid Content-Type header.', $url);
     }
 
-    // Set the vimeo thumbnail url + width + height
+    // The oembed resource doesnt fetch the thumbnail url, or it's details when
+    // it's locked/hidden, so we must
     if (strpos($url, 'vimeo.com')) {
-      $vimeo = VimeoThumbnailRebuilder::requestVimeo($data['video_id']);
-      $vimeo_data = VimeoThumbnailRebuilder::parseVimeoVideoRequest($vimeo['body']);
+      $vimeo = VimeoThumbnailRebuilder::vimeoRequest($data['video_id']);
+      $thumbnail_url = VimeoThumbnailRebuilder::parseImageUrlFromResponse($vimeo);
+      $image_style_size = VimeoThumbnailRebuilder::getDefaultImageStyleSize();
 
       $data += [
-        'thumbnail_url'    => $vimeo_data['images'][3]['link'],
-        'thumbnail_width'  => $vimeo_data['thumbnail_width'],
-        'thumbnail_height' => $vimeo_data['thumbnail_height'],
+        'thumbnail_url'    => $thumbnail_url,
+        'thumbnail_width'  => $image_style_size['width'],
+        'thumbnail_height' => $image_style_size['height'],
       ];
     }
 
