@@ -102,9 +102,9 @@ class VimeoPrivateCredentialsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->state->set('vimeo_private.vimeo_credentials.client_id', $form_state->getValue('client_id'));
-    $this->state->set('vimeo_private.vimeo_credentials.client_secret', $form_state->getValue('client_secret'));
-    $this->state->set('vimeo_private.vimeo_credentials.api_token', $form_state->getValue('api_token'));
+    $this->state->set('vimeo_private.credentials.client_id', $form_state->getValue('client_id'));
+    $this->state->set('vimeo_private.credentials.client_secret', $form_state->getValue('client_secret'));
+    $this->state->set('vimeo_private.credentials.api_token', $form_state->getValue('api_token'));
 
     $this->messenger->addMessage($this->t('Vimeo credentials set.'));
   }

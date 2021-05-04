@@ -98,6 +98,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
       '#type'          => 'select',
       '#title'         => t('Choose image style:'),
       '#options'       => $this->imageStyles,
+      '#empty_option' => $this->t('No default image style'),
       '#default_value' => isset($default_image_style) ? $default_image_style : '',
       '#required'      => TRUE,
     ];

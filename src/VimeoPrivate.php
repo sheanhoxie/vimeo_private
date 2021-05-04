@@ -22,15 +22,22 @@ class VimeoPrivate {
   /**
    * Returns the vimeo credentials used to make the Vimeo request
    *
-   * @return array
+   * @return array|bool
    */
-  private static function credentials() {
+  public static function credentials() {
     $state = \Drupal::state();
 
+    switch (NULL) {
+      case $id = $state->get('vimeo_private.credentials.client_id'):
+      case $secret = $state->get('vimeo_private.credentials.client_secret'):
+      case $token = $state->get('vimeo_private.credentials.api_token'):
+        return FALSE;
+    }
+
     return [
-      'client_id'     => $state->get('vimeo_private.vimeo_credentials.client_id'),
-      'client_secret' => $state->get('vimeo_private.vimeo_credentials.client_secret'),
-      'api_token'     => $state->get('vimeo_private.vimeo_credentials.api_token'),
+      'client_id'     => $id,
+      'client_secret' => $secret,
+      'api_token'     => $token
     ];
   }
 

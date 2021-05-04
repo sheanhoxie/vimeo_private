@@ -4,6 +4,7 @@ namespace Drupal\vimeo_private\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\vimeo_private\VimeoPrivate;
 
 /**
  * Configure Vimeo Private settings
@@ -11,19 +12,6 @@ use Drupal\Core\Form\FormStateInterface;
  * @package Drupal\vimeo_private\Form
  */
 class VimeoPrivateConfigForm extends ConfigFormBase {
-
-  /**
-   * Gets the configuration names that will be editable.
-   *
-   * @return array
-   *   An array of configuration object names that are editable if called in
-   *   conjunction with the trait's config() method.
-   */
-  protected function getEditableConfigNames() {
-    return [
-      'vimeo_private.settings',
-    ];
-  }
 
   /**
    * Returns a unique string identifying the form.
@@ -39,31 +27,34 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
     return 'vimeo_private_settings_form';
   }
 
-
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('vimeo_private.settings');
-    $default_style = $config->get('default_style');
+   $default_style = VimeoPrivate::getDefaultImageStyle();
 
-    $image_styles = \Drupal::entityTypeManager()->getStorage('image_style')->getQuery()->execute();
+    $image_styles = \Drupal::entityTypeManager()
+      ->getStorage('image_style')
+      ->getQuery()
+      ->execute();
 
     $form['vimeo_private_settings'] = [
-      '#type' => 'fieldset',
+      '#type'  => 'fieldset',
       '#title' => $this->t('Vimeo Private settings'),
     ];
 
     $form['vimeo_private_settings']['default_style'] = [
-      '#type' => 'select',
-      '#title' => t('Choose image style:'),
-      '#options' => $image_styles,
+      '#type'          => 'select',
+      '#title'         => t('Choose image style:'),
+      '#options'       => $image_styles,
+      '#empty_option' => $this->t('Select a default image style'),
       '#default_value' => $default_style ? $default_style : '',
-      '#required' => TRUE,
+      '#required'      => TRUE,
+
     ];
 
     $form['submit'] = [
-      '#type' => 'submit',
+      '#type'  => 'submit',
       '#value' => $this->t('Set default vimeo thumbnail'),
     ];
 
@@ -86,6 +77,19 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
     $this->config('vimeo_private.settings')
       ->set('default_style', $form_state->getValue('default_style'))
       ->save();
+  }
+
+  /**
+   * Gets the configuration names that will be editable.
+   *
+   * @return array
+   *   An array of configuration object names that are editable if called in
+   *   conjunction with the trait's config() method.
+   */
+  protected function getEditableConfigNames() {
+    return [
+      'vimeo_private.settings',
+    ];
   }
 
 
