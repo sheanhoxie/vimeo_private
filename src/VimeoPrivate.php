@@ -97,7 +97,7 @@ class VimeoPrivate {
     // Build image uri
     $image_url = self::getImageUrlFromResponse($vimeo_response);
     $image_name = self::getImageNameFromResponse($vimeo_response);
-    $image_style_uri = $image_style->buildUri($image_name);
+    $image_style_uri = $image_style->buildUri('public://' . $image_name);
 
     // Retrieve the image from Vimeo and save it
     $image_data = file_get_contents($image_url);
