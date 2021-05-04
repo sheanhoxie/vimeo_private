@@ -91,12 +91,25 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    $default_image_style = VimeoPrivate::getDefaultImageStyle();
+  public function buildForm(array $form, FormStateInterface $form_state, $media = NULL) {
+    $options = [];
+    foreach (VimeoPrivate::loadVimeoMedia() as $vimeo_media) {
+      $id = $vimeo_media->id();
+      $options[$id] = $vimeo_media->getName() . " (id: $id)";
+    }
 
+    $form['media'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Choose the video to update'),
+      '#options' => $options,
+      '#empty_option' => $this->t('All'),
+      '#default_value' => $media,
+    ];
+
+    $default_image_style = VimeoPrivate::getDefaultImageStyle();
     $form['image_style'] = [
       '#type'          => 'select',
-      '#title'         => t('Choose image style:'),
+      '#title'         => $this->t('Choose image style:'),
       '#options'       => $this->imageStyles,
       '#empty_option' => $this->t('No default image style'),
       '#default_value' => isset($default_image_style) ? $default_image_style : '',

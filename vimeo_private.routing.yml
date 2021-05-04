@@ -17,14 +17,18 @@ vimeo_private.credentials_form:
   options:
     _admin_route: TRUE
 vimeo_private.rebuild_thumbnails_form:
-  path: '/admin/vimeo_private/rebuild'
+  path: '/admin/vimeo_private/rebuild/{media}'
   defaults:
     _form: '\Drupal\vimeo_private\Form\VimeoPrivateRebuildThumbnailsForm'
     _title: 'Rebuild Vimeo Thumbnails'
-  requirements:
-    _permission: 'access administration pages'
+    media: NULL
   options:
     _admin_route: TRUE
+  parameters:
+    media:
+      type: entity:media
+  requirements:
+    _permission: 'access administration pages'
 vimeo_private.media.update_thumbnail_form:
   path: '/media/{media}/update_vimeo_thumbnail'
   defaults:
