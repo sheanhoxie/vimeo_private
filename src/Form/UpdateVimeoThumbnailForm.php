@@ -4,6 +4,7 @@ namespace Drupal\vimeo_thumbnail_rebuilder\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder;
 
 class UpdateVimeoThumbnailForm extends FormBase {
 
@@ -17,8 +18,6 @@ class UpdateVimeoThumbnailForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $media = NULL) {
     $this->media = $media;
 
-    // Select image style
-
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => t('Update Thumbnail'),
@@ -28,10 +27,8 @@ class UpdateVimeoThumbnailForm extends FormBase {
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $mediaUrl = $this->media->get('field_media_oembed_video')->value;
-    $vimeo_id = $this->getVimeoIDFromUrl($mediaUrl);
-    $hean = 21;
-
+    $default_image_style = VimeoThumbnailRebuilder::getDefaultImageStyle();
+    $success = VimeoThumbnailRebuilder::rebuildThumbnail($this->media, $default_image_style);
   }
 
   /**

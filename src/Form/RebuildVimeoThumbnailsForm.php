@@ -94,14 +94,13 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('vimeo_thumbnail_rebuilder.settings');
-    $default_style = $config->get('default_style');
+    $default_image_style = VimeoThumbnailRebuilder::getDefaultImageStyle();
 
     $form['image_style'] = [
       '#type'          => 'select',
       '#title'         => t('Choose image style:'),
       '#options'       => $this->imageStyles,
-      '#default_value' => isset($default_style) ? $default_style : '',
+      '#default_value' => isset($default_image_style) ? $default_image_style : '',
       '#required'      => TRUE,
     ];
 

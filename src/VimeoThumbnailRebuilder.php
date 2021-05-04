@@ -145,6 +145,11 @@ class VimeoThumbnailRebuilder {
     return array_pop($array);
   }
 
+  public static function getDefaultImageStyle() {
+    $config = \Drupal::config('vimeo_thumbnail_rebuilder.settings');
+    return $config->get('default_style');
+  }
+
   /**
    * Returns the height and width of the default image style as set in
    * vimeo_thumbnail_rebuilder.settings.default_style
