@@ -1,6 +1,6 @@
 {
-  "name": "drupal/vimeo_thumbnail_rebuilder",
-  "description": "Provides a form to update existing Vimeo video thumbnails.",
+  "name": "drupal/vimeo_private",
+  "description": "Provides functionality for retrieving private Vimeo video data",
   "type": "drupal-module",
   "keywords": ["Drupal", "Media", "Vimeo"],
   "license": "GPL-2.0+",
