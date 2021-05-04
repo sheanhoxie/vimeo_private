@@ -133,20 +133,13 @@ class RebuildVimeoThumbnailsForm extends FormBase {
       ];
     }
 
-    $image_style = ImageStyle::load($form_state->getValue('image_style'));
-    // make sure the image style directory exists and is writeable
-    $directory = file_default_scheme() . '://styles/' . $image_style->getName();
-    if (!$prepare_destination = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      return $form_state->setErrorByName('Unable to write to image style directory');
-    }
-
     $batch = [
       'title'        => t('Vimeo Thumbnail Rebuilder'),
       'init_message' => t('<h2>Preparing to batch process Vimeo thumbnails...</h2>'),
       'operations'   => [
         [
           [$this, 'batchThumbnailRebuild'],
-          [$batch_videos, $image_style],
+          [$batch_videos, $form_state->getValue('image_style')],
         ],
       ],
       'finished'     => [$this, 'batchFinished'],
