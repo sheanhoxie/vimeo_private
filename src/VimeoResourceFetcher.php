@@ -61,8 +61,8 @@ class VimeoResourceFetcher extends ResourceFetcher {
     // it's locked/hidden, so we must
     if (strpos($url, 'vimeo.com')) {
       $vimeo = VimeoThumbnailRebuilder::vimeoRequest($data['video_id']);
-      $thumbnail_url = VimeoThumbnailRebuilder::parseImageUrlFromResponse($vimeo);
-      $image_style_size = VimeoThumbnailRebuilder::getDefaultImageStyleSize();
+      $thumbnail_url = VimeoThumbnailRebuilder::getImageUrlFromResponse($vimeo);
+      $image_style_size = VimeoThumbnailRebuilder::defaultImageStyleSizes();
 
       $data += [
         'thumbnail_url'    => $thumbnail_url,
