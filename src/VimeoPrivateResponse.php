@@ -1,13 +1,13 @@
 <?php
 
-namespace Drupal\vimeo_thumbnail_rebuilder;
+namespace Drupal\vimeo_private;
 
 /**
  * Class VimeoResponse
  *
- * @package Drupal\vimeo_thumbnail_rebuilder
+ * @package Drupal\vimeo_private
  */
-class VimeoResponse implements VimeoResponseInterface {
+class VimeoPrivateResponse implements VimeoPrivateResponseInterface {
 
   /**
    * Stores all data returned from Vimeo

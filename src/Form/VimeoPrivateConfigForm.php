@@ -1,11 +1,16 @@
 <?php
 
-namespace Drupal\vimeo_thumbnail_rebuilder\Form;
+namespace Drupal\vimeo_private\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-class VimeoThumbnailsConfigForm extends ConfigFormBase {
+/**
+ * Configure Vimeo Private settings
+ *
+ * @package Drupal\vimeo_private\Form
+ */
+class VimeoPrivateConfigForm extends ConfigFormBase {
 
   /**
    * Gets the configuration names that will be editable.
@@ -16,7 +21,7 @@ class VimeoThumbnailsConfigForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'vimeo_thumbnail_rebuilder.settings',
+      'vimeo_private.settings',
     ];
   }
 
@@ -31,7 +36,7 @@ class VimeoThumbnailsConfigForm extends ConfigFormBase {
    *   The unique string identifying the form.
    */
   public function getFormId() {
-    return 'vimeo_thumbnail_rebuilder_settings_form';
+    return 'vimeo_private_settings_form';
   }
 
 
@@ -39,17 +44,17 @@ class VimeoThumbnailsConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('vimeo_thumbnail_rebuilder.settings');
+    $config = $this->config('vimeo_private.settings');
     $default_style = $config->get('default_style');
 
     $image_styles = \Drupal::entityTypeManager()->getStorage('image_style')->getQuery()->execute();
 
-    $form['vimeo_thumbnail_rebuilder_settings'] = [
+    $form['vimeo_private_settings'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Vimeo Thumbnail Rebuilder settings'),
+      '#title' => $this->t('Vimeo Private settings'),
     ];
 
-    $form['vimeo_thumbnail_rebuilder_settings']['default_style'] = [
+    $form['vimeo_private_settings']['default_style'] = [
       '#type' => 'select',
       '#title' => t('Choose image style:'),
       '#options' => $image_styles,
@@ -78,7 +83,7 @@ class VimeoThumbnailsConfigForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $this->config('vimeo_thumbnail_rebuilder.settings')
+    $this->config('vimeo_private.settings')
       ->set('default_style', $form_state->getValue('default_style'))
       ->save();
   }

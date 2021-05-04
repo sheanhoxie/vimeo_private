@@ -2,28 +2,26 @@
 
 /**
  * @file
- * Contains Drupal\vimeo_thumbnail_rebuilder\Form\RebuildVimeoThumbnailsForm
+ * Contains Drupal\vimeo_private\Form\RebuildVimeoThumbnailsForm
  */
 
-namespace Drupal\vimeo_thumbnail_rebuilder\Form;
+namespace Drupal\vimeo_private\Form;
 
+use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Logger\LoggerChannelInterface;
-use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\file\Entity\File;
-use Drupal\image\Entity\ImageStyle;
-use Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder;
+use Drupal\vimeo_private\VimeoPrivate;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a form to rebuild vimeo thumbnails
  */
-class RebuildVimeoThumbnailsForm extends FormBase {
+class VimeoPrivateRebuildThumbnailsForm extends FormBase {
 
   /**
    * @var \Drupal\Core\Session\AccountInterface
@@ -78,7 +76,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
     return new static(
       $container->get('current_user'),
       $container->get('entity_type.manager'),
-      $container->get('logger.factory')->get('vimeo_thumbnail_rebuilder'),
+      $container->get('logger.factory')->get('vimeo_private'),
       $container->get('messenger')
     );
   }
@@ -87,14 +85,14 @@ class RebuildVimeoThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'rebuild_vimeo_thumbnails_form';
+    return 'vimeo_private_rebuild_thumbnails_form';
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $default_image_style = VimeoThumbnailRebuilder::getDefaultImageStyle();
+    $default_image_style = VimeoPrivate::getDefaultImageStyle();
 
     $form['image_style'] = [
       '#type'          => 'select',
@@ -125,7 +123,7 @@ class RebuildVimeoThumbnailsForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $batch_videos = [];
     /** @var \Drupal\media\Entity\Media $video */
-    foreach (VimeoThumbnailRebuilder::loadVimeoMedia() as $video) {
+    foreach (VimeoPrivate::loadVimeoMedia() as $video) {
       $batch_videos[] = [
         'video'         => $video,
         'thumbnail_tid' => $video->thumbnail->target_id,
@@ -175,9 +173,11 @@ class RebuildVimeoThumbnailsForm extends FormBase {
 
     // Current video to process
     $current_index = $context['sandbox']['progress'];
-    if ($rebuildThumb = VimeoThumbnailRebuilder::rebuildThumbnail($videos[$current_index]['video'], $image_style)) {
+
+    try {
+      VimeoPrivate::rebuildThumbnail($videos[$current_index]['video'], $image_style);
       $context['results']['processed']++;
-    } else {
+    } catch (EntityStorageException $exception) {
       $context['results']['errored']++;
     }
 

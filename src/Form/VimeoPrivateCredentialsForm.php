@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\vimeo_thumbnail_rebuilder\Form;
+namespace Drupal\vimeo_private\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -9,9 +9,9 @@ use Drupal\Core\State\StateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class VimeoCredentialsForm.
+ * Provides a form for Vimeo Private API credentials
  */
-class VimeoCredentialsForm extends FormBase {
+class VimeoPrivateCredentialsForm extends FormBase {
 
   /**
    * @var \Drupal\Core\State\StateInterface
@@ -32,7 +32,7 @@ class VimeoCredentialsForm extends FormBase {
   /**
    * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
    *
-   * @return \Drupal\Core\Form\FormBase|\Drupal\vimeo_thumbnail_rebuilder\Form\VimeoCredentialsForm
+   * @return \Drupal\Core\Form\FormBase|\Drupal\vimeo_private\Form\VimeoPrivateCredentialsForm
    */
   public static function create(ContainerInterface $container) {
     return new static(
@@ -45,7 +45,7 @@ class VimeoCredentialsForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'vimeo_credentials_form';
+    return 'vimeo_private_credentials_form';
   }
 
   /**
@@ -57,14 +57,14 @@ class VimeoCredentialsForm extends FormBase {
       '#title' => $this->t('Client ID'),
       '#maxlength' => 64,
       '#size' => 64,
-      '#default_value' => $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id'),
+      '#default_value' => $this->state->get('vimeo_private.credentials.client_id'),
     ];
     $form['client_secret'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Client Secret'),
       '#maxlength' => 128,
       '#size' => 64,
-      '#default_value' => $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret'),
+      '#default_value' => $this->state->get('vimeo_private.credentials.client_secret'),
     ];
     $form['api_token'] = [
       '#type' => 'password',
@@ -72,7 +72,7 @@ class VimeoCredentialsForm extends FormBase {
       '#maxlength' => 64,
       '#size' => 64,
       '#default_value' => '',
-      '#description' => $this->state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token') ? t("API Token Set &#x2705;") : t("API Token Not Set &#x2757;"),
+      '#description' => $this->state->get('vimeo_private.credentials.api_token') ? t("API Token Set &#x2705;") : t("API Token Not Set &#x2757;"),
     ];
     $form['submit'] = [
       '#type' => 'submit',
@@ -102,9 +102,9 @@ class VimeoCredentialsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id', $form_state->getValue('client_id'));
-    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret', $form_state->getValue('client_secret'));
-    $this->state->set('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token', $form_state->getValue('api_token'));
+    $this->state->set('vimeo_private.vimeo_credentials.client_id', $form_state->getValue('client_id'));
+    $this->state->set('vimeo_private.vimeo_credentials.client_secret', $form_state->getValue('client_secret'));
+    $this->state->set('vimeo_private.vimeo_credentials.api_token', $form_state->getValue('api_token'));
 
     $this->messenger->addMessage($this->t('Vimeo credentials set.'));
   }

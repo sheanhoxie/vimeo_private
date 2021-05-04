@@ -1,0 +1,27 @@
+vimeo_private.main_menu:
+  title: 'Vimeo Private'
+  route_name: vimeo_private.rebuild_thumbnails_form
+  description: 'Vimeo Private'
+  parent: system.admin_config_system
+  weight: 99
+
+vimeo_private.rebuild_thumbnails_form:
+  title: 'Rebuild Vimeo Thumbnails'
+  route_name: vimeo_private.rebuild_thumbnails_form
+  description: 'Rebuild Vimeo thumbnails'
+  parent: vimeo_private.main_menu
+  weight: 10
+
+vimeo_private.credentials_form:
+  title: 'Vimeo Credentials'
+  route_name: vimeo_private.credentials_form
+  description: 'Vimeo credentials'
+  parent: vimeo_private.main_menu
+  weight: 20
+
+vimeo_private.settings:
+  title: 'Settings'
+  route_name: vimeo_private.settings
+  description: 'Vimeo Thumbnail Rebuilder Settings'
+  parent: vimeo_private.main_menu
+  weight: 30

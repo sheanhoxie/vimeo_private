@@ -1,0 +1,10 @@
+services:
+  logger.channel.vimeo_private:
+    parent: logger.channel_base
+    arguments: ['vimeo_private']
+  vimeo_private.vimeo:
+    class: Vimeo\Vimeo
+    arguments: ['', '', '']
+  vimeo_private.oembed.resource_fetcher:
+    class: Drupal\vimeo_private\VimeoPrivateResourceFetcher
+    arguments: ['@http_client', '@media.oembed.provider_repository', '@cache.default']

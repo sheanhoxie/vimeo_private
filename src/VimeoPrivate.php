@@ -4,7 +4,7 @@
  *  Provides the functionality for creating & updating Vimeo thumbnails
  */
 
-namespace Drupal\vimeo_thumbnail_rebuilder;
+namespace Drupal\vimeo_private;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\File\FileSystemInterface;
@@ -15,9 +15,9 @@ use Vimeo\Vimeo;
 /**
  * Class VimeoThumbnailRebuilder
  *
- * @package Drupal\vimeo_thumbnail_rebuilder
+ * @package Drupal\vimeo_private
  */
-class VimeoThumbnailRebuilder {
+class VimeoPrivate {
 
   /**
    * Returns the vimeo credentials used to make the Vimeo request
@@ -28,9 +28,9 @@ class VimeoThumbnailRebuilder {
     $state = \Drupal::state();
 
     return [
-      'client_id'     => $state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_id'),
-      'client_secret' => $state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.client_secret'),
-      'api_token'     => $state->get('vimeo_thumbnail_rebuilder.vimeo_credentials.api_token'),
+      'client_id'     => $state->get('vimeo_private.vimeo_credentials.client_id'),
+      'client_secret' => $state->get('vimeo_private.vimeo_credentials.client_secret'),
+      'api_token'     => $state->get('vimeo_private.vimeo_credentials.api_token'),
     ];
   }
 
@@ -39,7 +39,7 @@ class VimeoThumbnailRebuilder {
    *
    * @param  string  $vimeo_id
    *
-   * @return \Drupal\vimeo_thumbnail_rebuilder\VimeoResponse
+   * @return \Drupal\vimeo_private\VimeoPrivateResponse
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
   public static function vimeoRequest(string $vimeo_id) {
@@ -47,7 +47,7 @@ class VimeoThumbnailRebuilder {
     $vimeo = new Vimeo($credentials['client_id'], $credentials['client_secret'], $credentials['api_token']);
     $response = $vimeo->request('/videos/' . $vimeo_id, [], 'GET');
 
-    return new VimeoResponse($response['body']);
+    return new VimeoPrivateResponse($response['body']);
   }
 
   /**
@@ -79,13 +79,13 @@ class VimeoThumbnailRebuilder {
   /**
    * Creates the thumbnail image
    *
-   * @param  \Drupal\vimeo_thumbnail_rebuilder\VimeoResponse  $vimeo_response
-   * @param  ImageStyle                                       $image_style
+   * @param  \Drupal\vimeo_private\VimeoPrivateResponse  $vimeo_response
+   * @param  ImageStyle                                  $image_style
    *
    * @return \Drupal\file\FileInterface|false
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  private static function createImagesFromResponse(VimeoResponse $vimeo_response, ImageStyle $image_style) {
+  private static function createImagesFromResponse(VimeoPrivateResponse $vimeo_response, ImageStyle $image_style) {
     // Build image uri
     $image_url = self::getImageUrlFromResponse($vimeo_response);
     $image_name = self::getImageNameFromResponse($vimeo_response);
@@ -104,11 +104,11 @@ class VimeoThumbnailRebuilder {
   /**
    * Returns the thumbnail url from the Vimeo response
    *
-   * @param  VimeoResponse  $vimeo_response
+   * @param  VimeoPrivateResponse  $vimeo_response
    *
    * @return string|null
    */
-  public static function getImageUrlFromResponse(VimeoResponse $vimeo_response) {
+  public static function getImageUrlFromResponse(VimeoPrivateResponse $vimeo_response) {
     if ($vimeoImage = $vimeo_response->defaultPicture()) {
       $vimeoImage = UrlHelper::parse($vimeoImage['link'])['path'];
     }
@@ -119,11 +119,11 @@ class VimeoThumbnailRebuilder {
   /**
    * Returns the image name from it's url
    *
-   * @param \Drupal\vimeo_thumbnail_rebuilder\VimeoResponse
+   * @param \Drupal\vimeo_private\VimeoPrivateResponse
    *
    * @return mixed|string
    */
-  private static function getImageNameFromResponse(VimeoResponse $vimeo_response) {
+  private static function getImageNameFromResponse(VimeoPrivateResponse $vimeo_response) {
     $url = self::getImageUrlFromResponse($vimeo_response);
     $url_elements = explode('/', $url);
 
@@ -146,18 +146,18 @@ class VimeoThumbnailRebuilder {
   }
 
   public static function getDefaultImageStyle() {
-    $config = \Drupal::config('vimeo_thumbnail_rebuilder.settings');
+    $config = \Drupal::config('vimeo_private.settings');
     return $config->get('default_style');
   }
 
   /**
    * Returns the height and width of the default image style as set in
-   * vimeo_thumbnail_rebuilder.settings.default_style
+   * vimeo_private.settings.default_style
    *
    * @return array|null
    */
   public static function getDefaultImageStyleSizes() {
-    $default_style = \Drupal::config('vimeo_thumbnail_rebuilder.settings')
+    $default_style = \Drupal::config('vimeo_private.settings')
       ->get('default_style');
     $image_style = ImageStyle::load($default_style);
     $effects = $image_style->getEffects()->getConfiguration();

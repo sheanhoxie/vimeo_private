@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\vimeo_thumbnail_rebuilder;
+namespace Drupal\vimeo_private;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -10,10 +10,15 @@ use Drupal\media\OEmbed\ResourceFetcher;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 
-class VimeoResourceFetcher extends ResourceFetcher {
+/**
+ * Overrides the default Media oEmbed resource fetcher
+ *
+ * @package Drupal\vimeo_private
+ */
+class VimeoPrivateResourceFetcher extends ResourceFetcher {
 
   /**
-   * @var \Drupal\vimeo_thumbnail_rebuilder\VimeoThumbnailRebuilder
+   * @var \Drupal\vimeo_private\VimeoPrivate
    */
   private $vimeoThumbnailRebuilder;
 
@@ -60,9 +65,9 @@ class VimeoResourceFetcher extends ResourceFetcher {
     // The oembed resource doesnt fetch the thumbnail url, or it's details when
     // it's locked/hidden, so we must
     if (strpos($url, 'vimeo.com')) {
-      $vimeo = VimeoThumbnailRebuilder::vimeoRequest($data['video_id']);
-      $thumbnail_url = VimeoThumbnailRebuilder::getImageUrlFromResponse($vimeo);
-      $image_style_size = VimeoThumbnailRebuilder::getDefaultImageStyleSizes();
+      $vimeo = VimeoPrivate::vimeoRequest($data['video_id']);
+      $thumbnail_url = VimeoPrivate::getImageUrlFromResponse($vimeo);
+      $image_style_size = VimeoPrivate::getDefaultImageStyleSizes();
 
       $data += [
         'thumbnail_url'    => $thumbnail_url,

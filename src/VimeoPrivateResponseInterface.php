@@ -1,13 +1,13 @@
 <?php
 
-namespace Drupal\vimeo_thumbnail_rebuilder;
+namespace Drupal\vimeo_private;
 
 /**
- * Provides an interface providing a Vimeo Response
+ * Provides an interface for manipulating a Vimeo Response
  *
- * @package Drupal\vimeo_thumbnail_rebuilder
+ * @package Drupal\vimeo_private
  */
-interface VimeoResponseInterface {
+interface VimeoPrivateResponseInterface {
 
   /**
    * Returns the video id

@@ -1,9 +1,0 @@
-name: Vimeo Thumbnail Rebuilder
-description: Rebuilds Vimeo thumbnails
-
-type: module
-core: 8.x
-package: Media
-
-dependencies:
-  - drupal:media

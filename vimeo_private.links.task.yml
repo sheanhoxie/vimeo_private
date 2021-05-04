@@ -1,0 +1,14 @@
+vimeo_private.settings_tab:
+  route_name: vimeo_private.settings
+  title: 'Settings'
+  base_route: vimeo_private.rebuild_thumbnails_form
+
+vimeo_private.credentials_tab:
+  route_name: vimeo_private.credentials_form
+  title: 'Credentials'
+  base_route: vimeo_private.rebuild_thumbnails_form
+
+vimeo_private.rebuild_form:
+  route_name: vimeo_private.rebuild_thumbnails_form
+  title: 'Rebuild Thumbnails'
+  base_route: vimeo_private.rebuild_thumbnails_form
