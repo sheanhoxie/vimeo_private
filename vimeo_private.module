@@ -11,8 +11,8 @@ use Drupal\Core\Entity\EntityInterface;
 function vimeo_private_entity_operation_alter(array &$operations, EntityInterface $entity) {
   if ($entity->getEntityTypeId() === 'media' && $entity->bundle() === 'vimeo') {
     $operations['update_thumbnail'] = [
-      'title' => t('Update Thumb'),
-      'url' => \Drupal\Core\Url::fromRoute('vimeo_private.media.update_thumbnail_form', [
+      'title' => t('Update Thumbnail'),
+      'url' => \Drupal\Core\Url::fromRoute('vimeo_private.rebuild_thumbnails_form', [
         'media' => $entity->id(),
       ]),
       'weight' => 99,

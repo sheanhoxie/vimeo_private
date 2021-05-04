@@ -29,15 +29,3 @@ vimeo_private.rebuild_thumbnails_form:
       type: entity:media
   requirements:
     _permission: 'access administration pages'
-vimeo_private.media.update_thumbnail_form:
-  path: '/media/{media}/update_vimeo_thumbnail'
-  defaults:
-    _title: 'Update Vimeo Thumbnail'
-    _form: 'Drupal\vimeo_private\Form\VimeoPrivateUpdateThumbnailForm'
-  options:
-    _admin_route: TRUE
-    parameters:
-      media:
-        type: entity:media
-  requirements:
-    _permission: 'administer users'

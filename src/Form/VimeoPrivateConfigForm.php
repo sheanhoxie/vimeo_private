@@ -14,14 +14,7 @@ use Drupal\vimeo_private\VimeoPrivate;
 class VimeoPrivateConfigForm extends ConfigFormBase {
 
   /**
-   * Returns a unique string identifying the form.
-   *
-   * The returned ID should be a unique string that can be a valid PHP function
-   * name, since it's used in hook implementation names such as
-   * hook_form_FORM_ID_alter().
-   *
-   * @return string
-   *   The unique string identifying the form.
+   * {@inheritdoc}
    */
   public function getFormId() {
     return 'vimeo_private_settings_form';
@@ -31,23 +24,22 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-   $default_style = VimeoPrivate::getDefaultImageStyle();
-
-    $image_styles = \Drupal::entityTypeManager()
-      ->getStorage('image_style')
-      ->getQuery()
-      ->execute();
-
     $form['vimeo_private_settings'] = [
       '#type'  => 'fieldset',
       '#title' => $this->t('Vimeo Private settings'),
     ];
 
+    // Create default image style option
+    $default_style = VimeoPrivate::getDefaultImageStyle();
+    $image_styles = \Drupal::entityTypeManager()
+      ->getStorage('image_style')
+      ->getQuery()
+      ->execute();
     $form['vimeo_private_settings']['default_style'] = [
       '#type'          => 'select',
       '#title'         => t('Choose image style:'),
       '#options'       => $image_styles,
-      '#empty_option' => $this->t('Select a default image style'),
+      '#empty_option'  => $this->t('Select a default image style'),
       '#default_value' => $default_style ? $default_style : '',
       '#required'      => TRUE,
 

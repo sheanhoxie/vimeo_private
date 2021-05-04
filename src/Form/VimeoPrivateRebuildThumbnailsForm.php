@@ -15,6 +15,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Drupal\vimeo_private\VimeoPrivate;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -22,6 +23,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Provides a form to rebuild vimeo thumbnails
  */
 class VimeoPrivateRebuildThumbnailsForm extends FormBase {
+
+  /**
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
 
   /**
    * @var \Drupal\Core\Session\AccountInterface
@@ -37,11 +43,6 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
   private $logger;
-
-  /**
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
 
   /**
    * @var \Drupal\Core\Entity\EntityStorageInterface
@@ -92,17 +93,32 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $media = NULL) {
+    // Set form to enabled initially, and then disable on missing settings
+    $disabled = FALSE;
+
+    // Check that the credentials are set
+    if (VimeoPrivate::credentials() === FALSE) {
+      $disabled = TRUE;
+      $url = Url::fromRoute('vimeo_private.credentials_form');
+      $credentials_form = Link::fromTextAndUrl(t('Set Vimeo credentials here'), $url)
+        ->toString();
+      $this->messenger()
+        ->addWarning($this->t('No Vimeo API credentials set. %vimeo_credentials.', [
+          '%vimeo_credentials' => $credentials_form,
+        ]));
+    }
+
+    // Create the vimeo media select list
     $options = [];
     foreach (VimeoPrivate::loadVimeoMedia() as $vimeo_media) {
       $id = $vimeo_media->id();
       $options[$id] = $vimeo_media->getName() . " (id: $id)";
     }
-
     $form['media'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Choose the video to update'),
-      '#options' => $options,
-      '#empty_option' => $this->t('All'),
+      '#type'          => 'select',
+      '#title'         => $this->t('Choose the video to update'),
+      '#options'       => $options,
+      '#empty_option'  => $this->t('All'),
       '#default_value' => $media,
     ];
 
@@ -111,14 +127,15 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
       '#type'          => 'select',
       '#title'         => $this->t('Choose image style:'),
       '#options'       => $this->imageStyles,
-      '#empty_option' => $this->t('No default image style'),
+      '#empty_option'  => $this->t('No default image style'),
       '#default_value' => isset($default_image_style) ? $default_image_style : '',
       '#required'      => TRUE,
     ];
 
     $form['submit'] = [
-      '#type'  => 'submit',
-      '#value' => $this->t('Update all Vimeo thumbnails'),
+      '#type'     => 'submit',
+      '#value'    => $this->t('Update all Vimeo thumbnails'),
+      '#disabled' => $disabled,
     ];
 
     return $form;
@@ -135,6 +152,27 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $media = $form_state->getValue('media');
+    if (empty($media)) {
+      $this->setupBatch($form, $form_state);
+    } else {
+      $media = VimeoPrivate::loadVimeoMedia($media);
+      $media = array_pop($media);
+      VimeoPrivate::rebuildThumbnail($media, $form_state->getValue('image_style'));
+      $this->messenger()->addMessage($this->t('Thumbnail updated.'));
+    }
+  }
+
+  /**
+   * Setup for batch processing vimeo media
+   *
+   * @param  array                                 $form
+   * @param  \Drupal\Core\Form\FormStateInterface  $form_state
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  private function setupBatch(array &$form, FormStateInterface $form_state) {
     $batch_videos = [];
     /** @var \Drupal\media\Entity\Media $video */
     foreach (VimeoPrivate::loadVimeoMedia() as $video) {

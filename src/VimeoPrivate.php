@@ -1,7 +1,8 @@
 <?php
 
 /** @file
- *  Provides the functionality for creating & updating Vimeo thumbnails
+ *  Provides the functionality for creating & updating Vimeo thumbnails that are
+ *  set as private on Vimeo.com
  */
 
 namespace Drupal\vimeo_private;
@@ -80,7 +81,7 @@ class VimeoPrivate {
 
     // Set the new thumbnail and save the Media
     $media->thumbnail->target_id = $image->id();
-    return $media->save();
+    $media->save();
   }
 
   /**

@@ -6,7 +6,7 @@ vimeo_private.main_menu:
   weight: 99
 
 vimeo_private.rebuild_thumbnails_form:
-  title: 'Rebuild Vimeo Thumbnails'
+  title: 'Rebuild Thumbnails'
   route_name: vimeo_private.rebuild_thumbnails_form
   description: 'Rebuild Vimeo thumbnails'
   parent: vimeo_private.main_menu
