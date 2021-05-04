@@ -156,7 +156,7 @@ class VimeoThumbnailRebuilder {
    *
    * @return array|null
    */
-  public static function defaultImageStyleSizes() {
+  public static function getDefaultImageStyleSizes() {
     $default_style = \Drupal::config('vimeo_thumbnail_rebuilder.settings')
       ->get('default_style');
     $image_style = ImageStyle::load($default_style);
