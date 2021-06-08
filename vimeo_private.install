@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function vimeo_private_uninstall() {
+  // Remove state setting.
+  \Drupal::state()->delete('vimeo_private.settings');
+}
