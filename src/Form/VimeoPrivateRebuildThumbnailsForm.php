@@ -134,7 +134,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
 
     $form['submit'] = [
       '#type'     => 'submit',
-      '#value'    => $this->t('Update all Vimeo thumbnails'),
+      '#value'    => $this->t('Update thumbnails'),
       '#disabled' => $disabled,
     ];
 
