@@ -42,12 +42,20 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
       '#empty_option'  => $this->t('Select a default image style'),
       '#default_value' => $default_style ? $default_style : '',
       '#required'      => TRUE,
+    ];
 
+    // File type
+    $form['vimeo_private_settings']['file_type'] = [
+      '#type'          => 'textfield',
+      '#title'         => $this->t('File type'),
+      '#description'   => $this->t('Enter the file type to download from Vimeo.'),
+      '#default_value' => VimeoPrivate::getFileType(),
+      '#required'      => TRUE,
     ];
 
     $form['submit'] = [
       '#type'  => 'submit',
-      '#value' => $this->t('Set default vimeo thumbnail'),
+      '#value' => $this->t('Save settings'),
     ];
 
     return $form;
@@ -68,6 +76,7 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
 
     $this->config('vimeo_private.settings')
       ->set('default_style', $form_state->getValue('default_style'))
+      ->set('file_type', $form_state->getValue('file_type'))
       ->save();
   }
 
