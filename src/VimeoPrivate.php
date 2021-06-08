@@ -92,15 +92,15 @@ class VimeoPrivate {
    * @return string|null
    */
   public static function getImageUrlFromResponse(VimeoPrivateResponse $vimeo_response) {
-    if ($vimeoImage = $vimeo_response->defaultPicture()) {
-      $vimeoImage = UrlHelper::parse($vimeoImage['link'])['path'];
+    if ($image = $vimeo_response->defaultPicture()) {
+      $image = UrlHelper::parse($image['link'])['path'];
     }
-    if (!empty($vimeoImage)) {
+    if (!empty($image)) {
       $file_type = self::getFileType();
-      $vimeoImage = "$vimeoImage.$file_type";
+      $image = "$image.$file_type";
     }
 
-    return $vimeoImage;
+    return $image;
   }
 
   /**
