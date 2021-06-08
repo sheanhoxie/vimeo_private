@@ -36,7 +36,7 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
       ->getQuery()
       ->execute();
     $form['vimeo_private_settings']['default_style'] = [
-      '#type'          => 'select',
+      '#type'          => 'radios',
       '#title'         => t('Choose image style:'),
       '#options'       => $image_styles,
       '#empty_option'  => $this->t('Select a default image style'),
