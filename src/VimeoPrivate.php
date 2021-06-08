@@ -38,14 +38,14 @@ class VimeoPrivate {
     return [
       'client_id'     => $id,
       'client_secret' => $secret,
-      'api_token'     => $token
+      'api_token'     => $token,
     ];
   }
 
   /**
    * Requests details of a video from Vimeo using the Vimeo Developers API
    *
-   * @param  string  $vimeo_id
+   * @param string $vimeo_id
    *
    * @return \Drupal\vimeo_private\VimeoPrivateResponse
    * @throws \Vimeo\Exceptions\VimeoRequestException
@@ -62,8 +62,8 @@ class VimeoPrivate {
    * Retrieves a Vimeo Media object's active picture from Vimeo.com, and sets it
    * as the thumbnail.
    *
-   * @param  Media   $media
-   * @param  string  $image_style
+   * @param Media $media
+   * @param string $image_style
    *
    * @return bool
    * @throws \Drupal\Core\Entity\EntityStorageException
@@ -85,35 +85,9 @@ class VimeoPrivate {
   }
 
   /**
-   * Creates the thumbnail image
-   *
-   * @param  \Drupal\vimeo_private\VimeoPrivateResponse  $vimeo_response
-   * @param  ImageStyle                                  $image_style
-   *
-   * @return \Drupal\file\FileInterface|false
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  private static function createImagesFromResponse(VimeoPrivateResponse $vimeo_response, ImageStyle $image_style) {
-    // Build image uri
-    $image_url = self::getImageUrlFromResponse($vimeo_response);
-    $image_name = self::getImageNameFromResponse($vimeo_response);
-    $file_type = self::getFileType();
-    $image_style_uri = $image_style->buildUri("public://$image_name.$file_type");
-
-    // Retrieve the image from Vimeo and save it
-    $image_data = file_get_contents($image_url);
-    $image = file_save_data($image_data, $image_style_uri, FileSystemInterface::EXISTS_REPLACE);
-
-    // Flush the image style for this image
-    $image_style->flush($image_style_uri);
-
-    return $image;
-  }
-
-  /**
    * Returns the thumbnail url from the Vimeo response
    *
-   * @param  VimeoPrivateResponse  $vimeo_response
+   * @param VimeoPrivateResponse $vimeo_response
    *
    * @return string|null
    */
@@ -121,28 +95,18 @@ class VimeoPrivate {
     if ($vimeoImage = $vimeo_response->defaultPicture()) {
       $vimeoImage = UrlHelper::parse($vimeoImage['link'])['path'];
     }
+    if (!empty($vimeoImage)) {
+      $file_type = self::getFileType();
+      $vimeoImage = "$vimeoImage.$file_type";
+    }
 
     return $vimeoImage;
   }
 
   /**
-   * Returns the image name from it's url
-   *
-   * @param \Drupal\vimeo_private\VimeoPrivateResponse
-   *
-   * @return mixed|string
-   */
-  private static function getImageNameFromResponse(VimeoPrivateResponse $vimeo_response) {
-    $url = self::getImageUrlFromResponse($vimeo_response);
-    $url_elements = explode('/', $url);
-
-    return array_pop($url_elements);
-  }
-
-  /**
    * Returns the Vimeo video ID
    *
-   * @param  \Drupal\media\Entity\Media  $media
+   * @param \Drupal\media\Entity\Media $media
    *
    * @return string
    *  The vimeo video id. Can return with file extension
@@ -190,7 +154,7 @@ class VimeoPrivate {
   /**
    * Returns Media of type 'vimeo'
    *
-   * @param  string|null  $id  The ID of the media to be rebuilt, if NULL all
+   * @param string|null $id The ID of the media to be rebuilt, if NULL all
    *                           Vimeo media will be returned.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
@@ -209,6 +173,46 @@ class VimeoPrivate {
     }
 
     return $media_storage->loadMultiple($media->execute());
+  }
+
+  /**
+   * Creates the thumbnail image
+   *
+   * @param \Drupal\vimeo_private\VimeoPrivateResponse $vimeo_response
+   * @param ImageStyle $image_style
+   *
+   * @return \Drupal\file\FileInterface|false
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  private static function createImagesFromResponse(VimeoPrivateResponse $vimeo_response, ImageStyle $image_style) {
+    // Build image uri
+    $image_url = self::getImageUrlFromResponse($vimeo_response);
+    $image_name = self::getImageNameFromResponse($vimeo_response);
+    $file_type = self::getFileType();
+    $image_style_uri = $image_style->buildUri("public://$image_name.$file_type");
+
+    // Retrieve the image from Vimeo and save it
+    $image_data = file_get_contents($image_url);
+    $image = file_save_data($image_data, $image_style_uri, FileSystemInterface::EXISTS_REPLACE);
+
+    // Flush the image style for this image
+    $image_style->flush($image_style_uri);
+
+    return $image;
+  }
+
+  /**
+   * Returns the image name from it's url
+   *
+   * @param \Drupal\vimeo_private\VimeoPrivateResponse
+   *
+   * @return mixed|string
+   */
+  private static function getImageNameFromResponse(VimeoPrivateResponse $vimeo_response) {
+    $url = self::getImageUrlFromResponse($vimeo_response);
+    $url_elements = explode('/', $url);
+
+    return array_pop($url_elements);
   }
 
 }
