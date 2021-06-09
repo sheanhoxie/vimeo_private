@@ -127,7 +127,11 @@ class VimeoPrivate {
    *  The vimeo video id. Can return with file extension
    */
   public static function getVimeoIdFromMedia(Media $media) {
-    $url = $media->get('field_media_oembed_video')->value;
+    // So as not to hard code the field, we get the media source field here
+    $sourceConfig = $media->getSource()->getConfiguration();
+    $source_field = $sourceConfig['source_field'];
+
+    $url = $media->get($source_field)->value;
     $array = explode('/', $url);
 
     return array_pop($array);
