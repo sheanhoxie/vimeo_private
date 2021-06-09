@@ -9,6 +9,8 @@ namespace Drupal\vimeo_private;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
 use Vimeo\Vimeo;
@@ -28,11 +30,21 @@ class VimeoPrivate {
   public static function credentials() {
     $state = \Drupal::state();
 
+    // Check for missing credentials
     switch (NULL) {
       case $id = $state->get('vimeo_private.credentials.client_id'):
       case $secret = $state->get('vimeo_private.credentials.client_secret'):
       case $token = $state->get('vimeo_private.credentials.api_token'):
-        return FALSE;
+        $vimeoCredentialsLinks = Link::createFromRoute(t('Set your vimeo credentials here.'), 'vimeo_private.credentials_form')->toString();
+        \Drupal::messenger()->addWarning(t('Vimeo credentials have not been set. %vimeo_settings', [
+          '%vimeo_settings' => $vimeoCredentialsLinks,
+        ]));
+
+        return [
+          'client_id'     => '123',
+          'client_secret' => 'abc',
+          'api_token'     => 'xyz',
+        ];
     }
 
     return [
@@ -51,11 +63,14 @@ class VimeoPrivate {
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
   public static function vimeoRequest(string $vimeo_id) {
-    $credentials = self::credentials();
-    $vimeo = new Vimeo($credentials['client_id'], $credentials['client_secret'], $credentials['api_token']);
-    $response = $vimeo->request('/videos/' . $vimeo_id, [], 'GET');
+    if ($credentials = self::credentials()) {
+      $vimeo = new Vimeo($credentials['client_id'], $credentials['client_secret'], $credentials['api_token']);
+      $response = $vimeo->request('/videos/' . $vimeo_id, [], 'GET');
 
-    return new VimeoPrivateResponse($response['body']);
+      return new VimeoPrivateResponse($response['body']);
+    }
+
+    return NULL;
   }
 
   /**
