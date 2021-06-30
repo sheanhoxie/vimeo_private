@@ -132,9 +132,11 @@ class VimeoPrivate {
     $source_field = $sourceConfig['source_field'];
 
     $url = $media->get($source_field)->value;
-    $array = explode('/', $url);
+    $vimeoId = explode('https://vimeo.com/', $url);
+    // We only need the first value for those vimdeo videos with 2 ex. 12345/432
+    $vimeoId = explode('/', $vimeoId[1]);
 
-    return array_pop($array);
+    return array_shift($vimeoId);
   }
 
   public static function getDefaultImageStyle() {
