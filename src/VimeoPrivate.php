@@ -8,6 +8,7 @@
 namespace Drupal\vimeo_private;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
@@ -28,6 +29,7 @@ class VimeoPrivate {
   public static function credentials() {
     $state = \Drupal::state();
 
+    // Return warning if any credentials are not set
     switch (NULL) {
       case $id = $state->get('vimeo_private.credentials.client_id'):
       case $secret = $state->get('vimeo_private.credentials.client_secret'):
@@ -45,66 +47,65 @@ class VimeoPrivate {
   /**
    * Requests details of a video from Vimeo using the Vimeo Developers API
    *
-   * @param  string  $vimeo_id
+   * @param  Media  $media
    *
    * @return \Drupal\vimeo_private\VimeoPrivateResponse
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  public static function vimeoRequest(string $vimeo_id) {
+  public static function vimeoRequest($vimeo_id) {
     $credentials = self::credentials();
     $vimeo = new Vimeo($credentials['client_id'], $credentials['client_secret'], $credentials['api_token']);
+
     $response = $vimeo->request('/videos/' . $vimeo_id, [], 'GET');
 
     return new VimeoPrivateResponse($response['body']);
   }
 
   /**
-   * Retrieves a Vimeo Media object's active picture from Vimeo.com, and sets it
-   * as the thumbnail.
+   * Retrieves a video's details from Vimeo.com, and sets the latest image as
+   * the $media thumbnail.
    *
    * @param  Media   $media
-   * @param  string  $image_style
-   *
-   * @return bool
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  public static function rebuildThumbnail(Media $media, string $image_style) {
-    // Request video details from Vimeo
-    $vimeo_id = self::getVimeoIdFromMedia($media);
-    $vimeo_response = self::vimeoRequest($vimeo_id);
+  public static function rebuildThumbnail(Media $media) {
 
-    // Save the thumbnail derivative
-    /** @var ImageStyle $image_style */
-    $image_style = ImageStyle::load($image_style);
-    $image = self::createImagesFromResponse($vimeo_response, $image_style);
+    // Create the new image from the
+    $image = self::createImageFromMedia($media);
 
     // Set the new thumbnail and save the Media
     $media->thumbnail->target_id = $image->id();
     $media->save();
+
+    \Drupal::messenger()->addMessage(t('Thumbnail %name updated.', [
+      '%name' => $media->getName(),
+    ]));
   }
 
   /**
-   * Creates the thumbnail image
+   * Overwrites the existing media's image with a new image
    *
-   * @param  \Drupal\vimeo_private\VimeoPrivateResponse  $vimeo_response
-   * @param  ImageStyle                                  $image_style
+   * @param  Media  $media
    *
    * @return \Drupal\file\FileInterface|false
-   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  private static function createImagesFromResponse(VimeoPrivateResponse $vimeo_response, ImageStyle $image_style) {
+  private static function createImageFromMedia(Media $media) {
+    // Request video details from Vimeo
+    $vimeo_id = self::getVimeoIdFromMedia($media);
+    $vimeo_response = self::vimeoRequest($vimeo_id);
+
     // Build image uri
     $image_url = self::getImageUrlFromResponse($vimeo_response);
-    $image_name = self::getImageNameFromResponse($vimeo_response);
-    $image_style_uri = $image_style->buildUri('public://' . $image_name);
+    $thumbnail_uri = 'public://oembed_thumbnails/' . $vimeo_response->id() . '.jpg';
 
-    // Retrieve the image from Vimeo and save it
     $image_data = file_get_contents($image_url);
-    $image = file_save_data($image_data, $image_style_uri, FileSystemInterface::EXISTS_REPLACE);
+    $image = file_save_data($image_data, $thumbnail_uri, FileSystemInterface::EXISTS_REPLACE);
 
-    // Flush the image style for this image
-    $image_style->flush($image_style_uri);
+    // Clear all the images errrwhere
+    foreach (ImageStyle::loadMultiple() as $style) {
+      $style->flush();
+
+      \Drupal::logger('savvier_members')->notice('Flushing style %style', ['%style' => $style->getName()]);
+    }
 
     return $image;
   }
@@ -122,20 +123,6 @@ class VimeoPrivate {
     }
 
     return $vimeoImage;
-  }
-
-  /**
-   * Returns the image name from it's url
-   *
-   * @param \Drupal\vimeo_private\VimeoPrivateResponse
-   *
-   * @return mixed|string
-   */
-  private static function getImageNameFromResponse(VimeoPrivateResponse $vimeo_response) {
-    $url = self::getImageUrlFromResponse($vimeo_response);
-    $url_elements = explode('/', $url);
-
-    return array_pop($url_elements);
   }
 
   /**
@@ -159,50 +146,24 @@ class VimeoPrivate {
   }
 
   /**
-   * Returns the height and width of the default image style as set in
-   * vimeo_private.settings.default_style
-   *
-   * @return array|null
-   */
-  public static function getDefaultImageStyleSizes() {
-    $default_style = \Drupal::config('vimeo_private.settings')
-      ->get('default_style');
-    $image_style = ImageStyle::load($default_style);
-    $effects = $image_style->getEffects()->getConfiguration();
-    foreach ($effects as $uuid => $effect) {
-      if ($effect['id'] === 'image_scale_and_crop') {
-        return $effect['data'];
-      }
-    }
-
-    return [
-      'width'  => '500',
-      'height' => '500',
-    ];
-  }
-
-  /**
    * Returns Media of type 'vimeo'
    *
    * @param  string|null  $id  The ID of the media to be rebuilt, if NULL all
    *                           Vimeo media will be returned.
    *
-   * @return \Drupal\Core\Entity\EntityInterface[]
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @return EntityInterface|EntityInterface[]
    */
   public static function loadVimeoMedia(string $id = NULL) {
-    $entityTypeManager = \Drupal::entityTypeManager();
-    $media_storage = $entityTypeManager->getStorage('media');
-    $media = $media_storage->getQuery()
-      ->condition('bundle', 'vimeo')
-      ->exists('field_media_oembed_video');
+    $mediaStorage = \Drupal::entityTypeManager()->getStorage('media');
+    $media = $mediaStorage->getQuery()->condition('bundle', 'vimeo');
 
     if ($id) {
       $media->condition('mid', $id);
+      $media = $media->execute();
+      return $mediaStorage->load($media);
     }
 
-    return $media_storage->loadMultiple($media->execute());
+    return $mediaStorage->loadMultiple($media->execute());
   }
 
 }

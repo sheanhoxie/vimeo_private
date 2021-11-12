@@ -11,16 +11,12 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 
 /**
- * Overrides the default Media oEmbed resource fetcher
+ * Overrides the default Media oEmbed resource fetcher to allow Vimeo
+ * thumbnail rebuilding.
  *
  * @package Drupal\vimeo_private
  */
 class VimeoPrivateResourceFetcher extends ResourceFetcher {
-
-  /**
-   * @var \Drupal\vimeo_private\VimeoPrivate
-   */
-  private $vimeoThumbnailRebuilder;
 
   /**
    * VimeoResourceFetcher constructor.

@@ -16,6 +16,7 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\media\Entity\Media;
 use Drupal\vimeo_private\VimeoPrivate;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -129,18 +130,8 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if($media = $form_state->getValue('media')) {
-      $hean = 21;
-    }
-
-    if (empty($media)) {
-      $this->setupBatch($form, $form_state);
-    } else {
-      $media = VimeoPrivate::loadVimeoMedia($media);
-      $media = array_pop($media);
-      VimeoPrivate::rebuildThumbnail($media, $form_state->getValue('image_style'));
-      $this->messenger()->addMessage($this->t('Thumbnail updated.'));
-    }
+    // All videos
+    $this->setupBatch($form, $form_state);
   }
 
   /**
@@ -154,7 +145,8 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    */
   private function setupBatch(array &$form, FormStateInterface $form_state) {
     $batch_videos = [];
-    /** @var \Drupal\media\Entity\Media $video */
+
+    /** @var Media $video */
     foreach (VimeoPrivate::loadVimeoMedia() as $video) {
       $batch_videos[] = [
         'video'         => $video,
@@ -168,7 +160,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
       'operations'   => [
         [
           [$this, 'batchThumbnailRebuild'],
-          [$batch_videos, $form_state->getValue('image_style')],
+          [$batch_videos],
         ],
       ],
       'finished'     => [$this, 'batchFinished'],
@@ -181,13 +173,12 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * Batch process the video thumbnails rebuild
    *
    * @param $videos
-   * @param $image_style
    * @param $context
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
-  public function batchThumbnailRebuild($videos, $image_style, &$context) {
+  public function batchThumbnailRebuild($videos, &$context) {
     // Setup the sandbox
     if (empty($context['sandbox'])) {
       $context['sandbox']['progress'] = 0;
@@ -207,7 +198,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
     $current_index = $context['sandbox']['progress'];
 
     try {
-      VimeoPrivate::rebuildThumbnail($videos[$current_index]['video'], $image_style);
+      VimeoPrivate::rebuildThumbnail($videos[$current_index]['video']);
       $context['results']['processed']++;
     } catch (EntityStorageException $exception) {
       $context['results']['errored']++;

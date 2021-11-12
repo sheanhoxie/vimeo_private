@@ -3,6 +3,8 @@
 use Drupal\Core\Entity\EntityInterface;
 
 /**
+ * Add an 'update thumbnail' option to the entity operations.
+ *
  * Implements hook_entity_operation_alter().
  *
  * @param  array                                $operations
@@ -18,4 +20,13 @@ function vimeo_private_entity_operation_alter(array &$operations, EntityInterfac
       'weight' => 99,
     ];
   }
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function vimeo_private_media_alter(array &$entity_types) {
+  $hean = 21;
+  $hean = 21;
+  $hean = 21;
 }
