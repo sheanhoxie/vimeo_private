@@ -39,8 +39,7 @@ class VimeoPrivateResourceFetcher extends ResourceFetcher {
   public function fetchResource($url) {
     $cache_id = "media:oembed_resource:$url";
 
-    $cached = $this->cacheGet($cache_id);
-    if ($cached) {
+    if ($cached = $this->cacheGet($cache_id)) {
       return $this->createResource($cached->data, $url);
     }
 
@@ -50,34 +49,39 @@ class VimeoPrivateResourceFetcher extends ResourceFetcher {
       throw new ResourceException('Could not retrieve the oEmbed resource.', $url, [], $e);
     }
 
-    list($format) = $response->getHeader('Content-Type');
+    // Get response format type, and parse accordingly
+    [$format] = $response->getHeader('Content-Type');
     $content = (string) $response->getBody();
 
-    if (strstr($format, 'text/xml') || strstr($format, 'application/xml')) {
+    if (strstr($format, 'xml')) {
       $data = $this->parseResourceXml($content, $url);
-    } elseif (strstr($format, 'text/javascript') || strstr($format, 'application/json')) {
+    }
+    elseif (strstr($format, 'javascript') || strstr($format, 'json')) {
       $data = Json::decode($content);
-    } // If the response is neither XML nor JSON, we are in bat country.
+    }
     else {
       throw new ResourceException('The fetched resource did not have a valid Content-Type header.', $url);
     }
 
-    // The oembed resource doesnt fetch the thumbnail url, or it's details when
-    // it's locked/hidden, so we must
+    /**
+     * Fetch the hidden/locked Vimeo video thumbnail details and attach to the
+     * data resource
+     */
     if (strpos($url, 'vimeo.com')) {
+      // Get the latest details from vimeo
       $vimeo = VimeoPrivate::vimeoRequest($data['video_id']);
-      $thumbnail_url = VimeoPrivate::getImageUrlFromResponse($vimeo);
-      $image_style_size = VimeoPrivate::getDefaultImageStyleSizes();
+
+      // Get the thumbnail width/height
+      $vimeo_settings = \Drupal::config('vimeo_private.settings');
 
       $data += [
-        'thumbnail_url'    => $thumbnail_url,
-        'thumbnail_width'  => $image_style_size['width'],
-        'thumbnail_height' => $image_style_size['height'],
+        'thumbnail_url'    => VimeoPrivate::getImageUrlFromResponse($vimeo),
+        'thumbnail_width'  => $vimeo_settings->get('thumbnail_width'),
+        'thumbnail_height' => $vimeo_settings->get('thumbnail_height'),
       ];
     }
 
     $this->cacheSet($cache_id, $data);
-
     return $this->createResource($data, $url);
   }
 

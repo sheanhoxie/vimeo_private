@@ -4,7 +4,6 @@ namespace Drupal\vimeo_private\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\vimeo_private\VimeoPrivate;
 
 /**
  * Configure Vimeo Private settings
@@ -29,35 +28,26 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
       '#title' => $this->t('Vimeo Private settings'),
     ];
 
-    // Create default image style option
-    $default_style = VimeoPrivate::getDefaultImageStyle();
-    $image_styles = \Drupal::entityTypeManager()
-      ->getStorage('image_style')
-      ->getQuery()
-      ->execute();
-    $form['vimeo_private_settings']['default_style'] = [
-      '#type'          => 'select',
-      '#title'         => t('Choose image style:'),
-      '#options'       => $image_styles,
-      '#empty_option'  => $this->t('Select a default image style'),
-      '#default_value' => $default_style ? $default_style : '',
-      '#required'      => TRUE,
+    // Thumbnail Width
+    $form['thumbnail_width'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Thumbnail width'),
+      '#default_value' => $form_state->getValue('thumbnail_width') ?? '1280',
+    ];
 
+    // Thumbnail Height
+    $form['thumbnail_height'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Thumbnail height'),
+      '#default_value' => $form_state->getValue('thumbnail_height') ?? '720',
     ];
 
     $form['submit'] = [
       '#type'  => 'submit',
-      '#value' => $this->t('Set default vimeo thumbnail'),
+      '#value' => $this->t('Set thumbnail sizes.'),
     ];
 
     return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
   }
 
   /**
@@ -67,7 +57,8 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $this->config('vimeo_private.settings')
-      ->set('default_style', $form_state->getValue('default_style'))
+      ->set('thumbnail_width', $form_state->getValue('thumbnail_width'))
+      ->set('thumbnail_height', $form_state->getValue('thumbnail_height'))
       ->save();
   }
 

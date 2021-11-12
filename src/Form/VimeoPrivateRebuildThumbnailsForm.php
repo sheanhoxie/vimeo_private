@@ -96,8 +96,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
     // Check that the credentials are set
     if (VimeoPrivate::credentials() === FALSE) {
       $url = Url::fromRoute('vimeo_private.credentials_form');
-      $credentials_form = Link::fromTextAndUrl(t('Set Vimeo credentials here'), $url)
-        ->toString();
+      $credentials_form = Link::fromTextAndUrl(t('Set Vimeo credentials here'), $url)->toString();
       $this->messenger()
         ->addWarning($this->t('No Vimeo API credentials set. %vimeo_credentials.', [
           '%vimeo_credentials' => $credentials_form,
@@ -105,33 +104,22 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
       return $form;
     }
 
-    // Create the vimeo media select list
-    $options = [];
     foreach (VimeoPrivate::loadVimeoMedia() as $vimeo_media) {
       $id = $vimeo_media->id();
       $options[$id] = $vimeo_media->getName() . " (id: $id)";
     }
+
     $form['media'] = [
       '#type'          => 'select',
       '#title'         => $this->t('Choose the video to update'),
-      '#options'       => $options,
+      '#options'       => $options ?? [],
       '#empty_option'  => $this->t('All'),
       '#default_value' => $media,
     ];
 
-    $default_image_style = VimeoPrivate::getDefaultImageStyle();
-    $form['image_style'] = [
-      '#type'          => 'select',
-      '#title'         => $this->t('Choose image style:'),
-      '#options'       => $this->imageStyles,
-      '#empty_option'  => $this->t('No default image style'),
-      '#default_value' => isset($default_image_style) ? $default_image_style : '',
-      '#required'      => TRUE,
-    ];
-
     $form['submit'] = [
       '#type'     => 'submit',
-      '#value'    => $this->t('Update all Vimeo thumbnails'),
+      '#value'    => $this->t('Update Vimeo thumbnails'),
     ];
 
     return $form;
@@ -140,15 +128,11 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $media = $form_state->getValue('media');
+    if($media = $form_state->getValue('media')) {
+      $hean = 21;
+    }
+
     if (empty($media)) {
       $this->setupBatch($form, $form_state);
     } else {
