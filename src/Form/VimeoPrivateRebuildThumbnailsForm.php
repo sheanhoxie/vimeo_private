@@ -93,12 +93,8 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $media = NULL) {
-    // Set form to enabled initially, and then disable on missing settings
-    $disabled = FALSE;
-
     // Check that the credentials are set
     if (VimeoPrivate::credentials() === FALSE) {
-      $disabled = TRUE;
       $url = Url::fromRoute('vimeo_private.credentials_form');
       $credentials_form = Link::fromTextAndUrl(t('Set Vimeo credentials here'), $url)
         ->toString();
@@ -106,6 +102,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
         ->addWarning($this->t('No Vimeo API credentials set. %vimeo_credentials.', [
           '%vimeo_credentials' => $credentials_form,
         ]));
+      return $form;
     }
 
     // Create the vimeo media select list
@@ -135,7 +132,6 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
     $form['submit'] = [
       '#type'     => 'submit',
       '#value'    => $this->t('Update all Vimeo thumbnails'),
-      '#disabled' => $disabled,
     ];
 
     return $form;
