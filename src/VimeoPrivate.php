@@ -53,12 +53,14 @@ class VimeoPrivate {
    * @throws \Vimeo\Exceptions\VimeoRequestException
    */
   public static function vimeoRequest($vimeo_id) {
-    $credentials = self::credentials();
-    $vimeo = new Vimeo($credentials['client_id'], $credentials['client_secret'], $credentials['api_token']);
+    if ($credentials = self::credentials()) {
+      $vimeo = new Vimeo($credentials['client_id'], $credentials['client_secret'], $credentials['api_token']);
+      $response = $vimeo->request('/videos/' . $vimeo_id, [], 'GET');
 
-    $response = $vimeo->request('/videos/' . $vimeo_id, [], 'GET');
+      return new VimeoPrivateResponse($response['body']);
+    }
 
-    return new VimeoPrivateResponse($response['body']);
+    return NULL;
   }
 
   /**

@@ -64,17 +64,19 @@ class VimeoPrivateResourceFetcher extends ResourceFetcher {
      * data resource
      */
     if (strpos($url, 'vimeo.com')) {
-      // Get the latest details from vimeo
-      $vimeo = VimeoPrivate::vimeoRequest($data['video_id']);
 
-      // Get the thumbnail width/height
-      $vimeo_settings = \Drupal::config('vimeo_private.settings');
+      // Get the latest thumbnail details from vimeo
+      if ($vimeo = VimeoPrivate::vimeoRequest($data['video_id'])) {
 
-      $data += [
-        'thumbnail_url'    => VimeoPrivate::getImageUrlFromResponse($vimeo),
-        'thumbnail_width'  => $vimeo_settings->get('thumbnail_width'),
-        'thumbnail_height' => $vimeo_settings->get('thumbnail_height'),
-      ];
+        // Get the thumbnail width/height
+        $vimeo_settings = \Drupal::config('vimeo_private.settings');
+
+        $data += [
+          'thumbnail_url'    => VimeoPrivate::getImageUrlFromResponse($vimeo),
+          'thumbnail_width'  => $vimeo_settings->get('thumbnail_width'),
+          'thumbnail_height' => $vimeo_settings->get('thumbnail_height'),
+        ];
+      }
     }
 
     $this->cacheSet($cache_id, $data);
