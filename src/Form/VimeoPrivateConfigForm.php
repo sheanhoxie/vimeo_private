@@ -23,23 +23,26 @@ class VimeoPrivateConfigForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['vimeo_private_settings'] = [
+    // Get existing values
+    $config = $this->config('vimeo_private.settings');
+
+    $form['settings'] = [
       '#type'  => 'fieldset',
       '#title' => $this->t('Vimeo Private settings'),
     ];
 
     // Thumbnail Width
-    $form['thumbnail_width'] = [
+    $form['settings']['thumbnail_width'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Thumbnail width'),
-      '#default_value' => $form_state->getValue('thumbnail_width') ?? '1280',
+      '#default_value' => $config->get('thumbnail_width') ?? '1280',
     ];
 
     // Thumbnail Height
-    $form['thumbnail_height'] = [
+    $form['settings']['thumbnail_height'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Thumbnail height'),
-      '#default_value' => $form_state->getValue('thumbnail_height') ?? '720',
+      '#default_value' => $config->get('thumbnail_height') ?? '720',
     ];
 
     $form['submit'] = [
