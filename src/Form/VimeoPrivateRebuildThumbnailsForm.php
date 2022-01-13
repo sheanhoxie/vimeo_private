@@ -16,6 +16,7 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
 use Drupal\vimeo_private\VimeoPrivate;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -130,8 +131,14 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // All videos
-    $this->setupBatch($form, $form_state);
+    if ($id = $form_state->getValue('media')) {
+      // Single thumbnail
+      $media = VimeoPrivate::loadVimeoMedia($id);
+      VimeoPrivate::rebuildThumbnail($media);
+    } else {
+      // All thumbnails
+      $this->setupBatch($form, $form_state);
+    }
   }
 
   /**
@@ -238,6 +245,12 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
           '@success_count' => $results['processed'],
           '@skipped_count' => $results['skipped'],
         ]));
+    }
+
+    // Clear all the images errrwhere
+    foreach (ImageStyle::loadMultiple() as $style) {
+      $style->flush();
+      \Drupal::logger('savvier_members')->notice('Flushing style %style', ['%style' => $style->getName()]);
     }
   }
 

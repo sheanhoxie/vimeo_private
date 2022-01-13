@@ -8,9 +8,10 @@
 namespace Drupal\vimeo_private;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\DatabaseBackend;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
 use Vimeo\Vimeo;
 
@@ -78,6 +79,11 @@ class VimeoPrivate {
     $media->thumbnail->target_id = $image->id();
     $media->save();
 
+    if ($media_url = $media->get('field_media_oembed_video')->value) {
+      $cache_bin = \Drupal::cache('default');
+      $cache_bin->invalidate('media:oembed_resource:https://vimeo.com/api/oembed.json?url=' . $media_url);
+    }
+
     \Drupal::messenger()->addMessage(t('Thumbnail %name updated.', [
       '%name' => $media->getName(),
     ]));
@@ -97,17 +103,10 @@ class VimeoPrivate {
 
     // Build image uri
     $image_url = self::getImageUrlFromResponse($vimeo_response);
-    $thumbnail_uri = 'public://oembed_thumbnails/' . $vimeo_response->id() . '.jpg';
+    $thumbnail_uri = 'public://oembed_thumbnails/' . $vimeo_response->id() . '_' . rand(1000,9999) . '.jpg';
 
     $image_data = file_get_contents($image_url);
     $image = file_save_data($image_data, $thumbnail_uri, FileSystemInterface::EXISTS_REPLACE);
-
-    // Clear all the images errrwhere
-    foreach (ImageStyle::loadMultiple() as $style) {
-      $style->flush();
-
-      \Drupal::logger('savvier_members')->notice('Flushing style %style', ['%style' => $style->getName()]);
-    }
 
     return $image;
   }
@@ -162,7 +161,7 @@ class VimeoPrivate {
     if ($id) {
       $media->condition('mid', $id);
       $media = $media->execute();
-      return $mediaStorage->load($media);
+      return $mediaStorage->load(reset($media));
     }
 
     return $mediaStorage->loadMultiple($media->execute());
