@@ -21,11 +21,11 @@ vimeo_private.rebuild_thumbnails_form:
   defaults:
     _form: '\Drupal\vimeo_private\Form\VimeoPrivateRebuildThumbnailsForm'
     _title: 'Rebuild Vimeo Thumbnails'
-    media: NULL
+    media: null
   options:
     _admin_route: TRUE
-  parameters:
-    media:
-      type: entity:media
+    parameters:
+      media:
+        type: entity:media
   requirements:
     _permission: 'access administration pages'
