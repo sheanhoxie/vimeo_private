@@ -21,12 +21,3 @@ function vimeo_private_entity_operation_alter(array &$operations, EntityInterfac
     ];
   }
 }
-
-/**
- * Implements hook_entity_type_alter().
- */
-function vimeo_private_media_alter(array &$entity_types) {
-  $hean = 21;
-  $hean = 21;
-  $hean = 21;
-}
