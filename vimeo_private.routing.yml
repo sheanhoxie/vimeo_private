@@ -17,11 +17,11 @@ vimeo_private.credentials_form:
   options:
     _admin_route: TRUE
 vimeo_private.rebuild_thumbnails_form:
-  path: '/admin/vimeo_private/rebuild/{media}'
+  path: '/admin/vimeo_private/rebuild/{id}'
   defaults:
     _form: '\Drupal\vimeo_private\Form\VimeoPrivateRebuildThumbnailsForm'
     _title: 'Rebuild Vimeo Thumbnails'
-    media: null
+    id: null
   options:
     _admin_route: TRUE
   requirements:

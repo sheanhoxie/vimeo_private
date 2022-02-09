@@ -94,7 +94,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $media = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $id = NULL) {
     // Check that the credentials are set
     if (VimeoPrivate::credentials() === FALSE) {
       $url = Url::fromRoute('vimeo_private.credentials_form');
@@ -107,8 +107,8 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
     }
 
     foreach (VimeoPrivate::loadVimeoMedia() as $vimeo_media) {
-      $id = $vimeo_media->id();
-      $options[$id] = $vimeo_media->getName() . " (id: $id)";
+      $media_id = $vimeo_media->id();
+      $options[$media_id] = $vimeo_media->getName() . " (id: $media_id)";
     }
 
     $form['media'] = [
@@ -116,7 +116,7 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
       '#title'         => $this->t('Choose the video to update'),
       '#options'       => $options ?? [],
       '#empty_option'  => $this->t('All'),
-      '#default_value' => $media,
+      '#default_value' => $id,
     ];
 
     $form['submit'] = [
