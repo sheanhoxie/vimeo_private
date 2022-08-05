@@ -93,9 +93,6 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $media = NULL) {
-    // Set form to enabled initially, and then disable on missing settings
-    $disabled = FALSE;
-
     // Check that the credentials are set
     if (VimeoPrivate::credentials() === FALSE) {
       $disabled = TRUE;
@@ -134,8 +131,8 @@ class VimeoPrivateRebuildThumbnailsForm extends FormBase {
 
     $form['submit'] = [
       '#type'     => 'submit',
-      '#value'    => $this->t('Update thumbnails'),
-      '#disabled' => $disabled,
+      '#value'    => $this->t('Rebuild'),
+      '#disabled' => $disabled ?? FALSE,
     ];
 
     return $form;

@@ -186,8 +186,8 @@ class VimeoPrivate {
     $entityTypeManager = \Drupal::entityTypeManager();
     $media_storage = $entityTypeManager->getStorage('media');
     $media = $media_storage->getQuery()
-      ->condition('bundle', 'vimeo')
-      ->exists('field_media_oembed_video');
+      ->condition('bundle', 'third_party_video')
+      ->exists('field_media_video_embed_field');
 
     if ($id) {
       $media->condition('mid', $id);
