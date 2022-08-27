@@ -10,7 +10,6 @@ namespace Drupal\vimeo_private;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Routing\RouteMatch;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\media\Entity\Media;
 use Vimeo\Vimeo;
@@ -187,7 +186,7 @@ class VimeoPrivate {
     $media_storage = $entityTypeManager->getStorage('media');
     $media = $media_storage->getQuery()
       ->condition('bundle', 'third_party_video')
-      ->exists('field_media_video_embed_field');
+      ->exists('field_media_oembed_video');
 
     if ($id) {
       $media->condition('mid', $id);
