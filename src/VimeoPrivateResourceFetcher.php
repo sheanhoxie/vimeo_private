@@ -39,7 +39,7 @@ class VimeoPrivateResourceFetcher extends ResourceFetcher {
   public function fetchResource($url) {
     $cache_id = "media:oembed_resource:$url";
 
-    $cached = $this->cacheGet($cache_id);
+    $cached = $this->cacheBackend->get($cache_id);
     if ($cached) {
       return $this->createResource($cached->data, $url);
     }
@@ -76,7 +76,7 @@ class VimeoPrivateResourceFetcher extends ResourceFetcher {
       ];
     }
 
-    $this->cacheSet($cache_id, $data);
+    $this->cacheBackend->set($cache_id, $data);
 
     return $this->createResource($data, $url);
   }
